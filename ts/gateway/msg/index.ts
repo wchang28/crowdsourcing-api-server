@@ -29,9 +29,9 @@ router.use('/events', ret.router); // topic subscription endpoint is available a
 let connectionsManager = ret.connectionsManager;
 
 connectionsManager.on('client_connect', (req:express.Request, connection: tr.ITopicConnection) : void => {
-    console.log('client ' + connection.id + ' @ ' + connection.remoteAddress + ' connected to the SSE topic endpoint');
+    console.log(new Date().toISOString() + ': client ' + connection.id + ' @ ' + connection.remoteAddress + ' connected to the SSE endpoint');
 }).on('client_disconnect', (req:express.Request, connection: tr.ITopicConnection) : void => {
-    console.log('client ' + connection.id + ' @ ' + connection.remoteAddress +  ' disconnected from the SSE topic endpoint');
+    console.log(new Date().toISOString() + ': client ' + connection.id + ' @ ' + connection.remoteAddress +  ' disconnected from the SSE endpoint');
 });
 
 export {router as Router, connectionsManager as ConnectionsManager};
