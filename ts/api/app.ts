@@ -60,7 +60,6 @@ if (Mode === "deploy") {
     appFactory.on("app-just-created", (app: express.Express) => {
         app.use(reqCounter.Middleware); // install the request counter middleware to app
     });
-
     console.log(new Date().toISOString() + ": connecting to the gateway msg server...");
     let api = new rcf.AuthorizedRestApi(node$.get(), {instance_url: "http://127.0.0.1:" + MsgPort.toString()});
     let msgClient = api.$M("/msg/events", {reconnetIntervalMS: 3000});
