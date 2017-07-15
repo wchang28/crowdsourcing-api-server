@@ -3,7 +3,7 @@ import {IWebServerConfig, startServer} from 'express-web-server';
 import * as rc from "express-req-counter";
 import * as rcf from "rcf";
 import * as node$ from "rest-node";
-import {Message, ReadyContent} from "../message";
+import {Message, ReadyContent, ApiServerStateQuery, ApiServerState} from "../message";
 import * as af from "./app-factory";
 
 let NODE_PATH = process.env["NODE_PATH"];
@@ -70,6 +70,16 @@ if (Mode === "deploy") {
                 let message : Message = msg.body;
                 if (message.type === "terminate") {
                     flagTerminationPending();
+                } else if (message.type === "api-state-query") {
+                    let query: ApiServerStateQuery = message.content;
+                    let content: ApiServerState = {QueryId: query.QueryId, InstanceId, RequestCounter: reqCounter.Counter};
+                    let msg: Message = {type: "api-state", content};
+                    msgClient.send("/topic/gateway", {}, msg).then(() => {
+                        console.log(new Date().toISOString() + ": <<ready>> message sent");
+                    }).catch((err: any) => {
+                        console.error(new Date().toISOString() + ': !!! crowdsourcing api server error: ' + JSON.stringify(err));
+                        process.exit(1);
+                    });
                 }
             }
         }).then((sub_id: string) => {
