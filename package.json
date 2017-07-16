@@ -23,11 +23,11 @@
     "express-req-counter": "https://github.com/wchang28/express-req-counter.git",
     "express-web-server": "https://github.com/wchang28/express-web-server.git",
     "lodash": "^4.17.4",
+    "msg-transaction-processor": "https://github.com/wchang28/msg-transaction-processor.git",
     "no-cache-express": "https://github.com/wchang28/no-cache-express.git",
     "rcf": "https://github.com/wchang28/rcf.git",
     "rcf-message-router": "https://github.com/wchang28/rcf-message-router.git",
     "rest-node": "https://github.com/wchang28/rest-node.git",
-    "shortid": "^2.2.8",
     "uuid": "^3.1.0"
   }
 }

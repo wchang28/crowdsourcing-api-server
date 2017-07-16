@@ -4,7 +4,7 @@ import * as http from "http";
 import {IStateMachine, Server} from "./state-machine";
 import {IConnectionsManager} from 'rcf-message-router';
 import {IApiServerMessenger} from "./api-server-messenger";
-import {IMsgTransactionProcessor} from "./msg-transaction-processor";
+import {IMsgTransactionProcessor} from "msg-transaction-processor";
 
 interface RequestInfo {
     apiServer?: Server;
