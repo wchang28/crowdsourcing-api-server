@@ -7,11 +7,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {IAppConfig} from './app-config';
 import * as events from "events";
-import {get as getServerManager, IServerMessenger} from "./server-mgr";
+import * as srvMgr from "./server-mgr";
 import * as sm from "./state-machine";
-import * as tr from 'rcf-message-router';
 import {Router as msgRouter, ConnectionsManager} from "./msg";
-import {Message, ServerId, ReadyContent, ApiServerStateQueryResult} from "../message";
+import * as messenger from "./api-server-messenger";
 import {IGlobal} from "./global";
 import {Router as servicesRouter} from "./services";
 import * as proxy from "express-http-proxy";
@@ -42,39 +41,9 @@ startServer(config.msgServerConfig, appMsg, (secure:boolean, host:string, port:n
     process.exit(1);
 });
 
-class ServerMessenger extends events.EventEmitter implements IServerMessenger, msgtx.ITransactionReceiver {
-    constructor(private connectionsManager: tr.IConnectionsManager) {
-        super();
-        this.connectionsManager.on("on_client_send_msg", (req:express.Request, connection: tr.ITopicConnection, params: tr.SendMsgParams) => {
-            if (params.destination === '/topic/gateway') {
-                let msg:Message = params.body;
-                if (msg.type === "ready") {
-                    let content: ReadyContent = msg.content;
-                    let InstanceId = content.InstanceId;
-                    if (content.NODE_PATH)
-                        console.log(new Date().toISOString() + ": NEW server reported NODE_PATH=" + content.NODE_PATH);
-                    else
-                        console.error(new Date().toISOString() + "!!! Error: server did not receive NODE_PATH env. variable");
-                    connection.cookie = InstanceId;
-                    this.emit("instance-launched", InstanceId);
-                } else if (msg.type === "api-state") {
-                    let content: ApiServerStateQueryResult = msg.content;
-                    this.emit("transaction-res-rcvd", content.QueryId, content.State);
-                }
-            }
-        }).on("client_disconnect", (req:express.Request, connection: tr.ITopicConnection) => {
-            let InstanceId: ServerId = connection.cookie;
-            this.emit("instance-terminated", InstanceId);
-        });
-    }
-    notifyToTerminate(InstanceId: string): void {
-        let msg: Message = {type: "terminate"};
-        this.connectionsManager.dispatchMessage("/topic/"+ InstanceId, {}, msg);
-    }
-}
-
-let serverMessanger = new ServerMessenger(ConnectionsManager);
-let serverManager = getServerManager(config.availableApiServerPorts, config.msgServerConfig.http.port, config.NODE_PATH, serverMessanger);
+let apiServerMessenger = messenger.get(ConnectionsManager);
+let apiServerMsgTransaction = msgtx.get(apiServerMessenger, {timeoutMS: 15000});
+let serverManager = srvMgr.get(config.availableApiServerPorts, config.msgServerConfig.http.port, config.NODE_PATH, apiServerMessenger);
 let stateMachine = sm.get(serverManager);
 
 stateMachine.on("ready", () => {    // api server is ready => get the proxy ready
@@ -96,8 +65,6 @@ stateMachine.on("ready", () => {    // api server is ready => get the proxy read
     console.error(new Date().toISOString() + ': !!! Error: ' + JSON.stringify(err));
 });
 
-let apiMsgTransaction = msgtx.get(serverMessanger, {timeoutMS: 15000});
-
 let appAdmin = express();
 appAdmin.set('jsonp callback name', 'cb');
 appAdmin.use(noCache);
@@ -106,7 +73,8 @@ appAdmin.use(prettyPrinter.get());
 
 let g: IGlobal = {
     stateMachine
-    ,apiMsgTransaction
+    ,apiServerMessenger
+    ,apiServerMsgTransaction
 };
 
 appAdmin.set("global", g);

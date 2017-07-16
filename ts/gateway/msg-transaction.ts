@@ -25,7 +25,7 @@ export interface Options {
 
 export interface IMsgTransaction {
     readonly Options: Options;
-    execute(transaction: ITransaction) : Promise<any>;
+    execute<T>(transaction: ITransaction) : Promise<T>;
     toJSON() : MsgTransactionJSON;
 
     on(event: "change", listener: () => void) : this;
@@ -62,7 +62,7 @@ class MsgTransaction extends events.EventEmitter implements IMsgTransaction {
         })
     }
     get Options() : Options {return _.assignIn({}, this.__options);}
-    execute(transaction: ITransaction) : Promise<any> {
+    execute<T>(transaction: ITransaction) : Promise<T> {
         return new Promise<any>((resolve: (value: any) => void, reject: (err: any) => void) => {
             let TransactionId = generate();
             this.emit("transaction-id-generated", TransactionId, transaction);

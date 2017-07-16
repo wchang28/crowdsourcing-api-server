@@ -2,6 +2,7 @@ import * as express from 'express';
 import {IGlobal} from "./global";
 import * as http from "http";
 import {IStateMachine} from "./state-machine";
+import {IApiServerMessenger} from "./api-server-messenger";
 import {IMsgTransaction} from "./msg-transaction";
 
 interface RequestInfo {
@@ -30,5 +31,6 @@ export class RequestData {
     }
 
     get StateMachine() : IStateMachine {return this.Global.stateMachine;}
-    get APIMsgTransaction() : IMsgTransaction {return this.Global.apiMsgTransaction;}
+    get APIServerMessenger() : IApiServerMessenger {return this.Global.apiServerMessenger;}
+    get APIServerMsgTransaction() : IMsgTransaction {return this.Global.apiServerMsgTransaction;}
 } 
