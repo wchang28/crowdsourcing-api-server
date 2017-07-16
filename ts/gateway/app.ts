@@ -66,8 +66,12 @@ stateMachine.on("ready", () => {    // api server is ready => get the proxy read
     console.error(new Date().toISOString() + ': !!! Error: ' + JSON.stringify(err));
 });
 
-apiServerMessenger.on("instance-terminate-ack", (InstanceId: ServerId, ackResult: TerminateAckResult) => {
+apiServerMessenger.on("instance-terminate-req", (InstanceId: ServerId) => {
+    console.log(new Date().toISOString() + ": <<TERM-REQ>> on api server instance " + InstanceId);
+}).on("instance-terminate-ack", (InstanceId: ServerId, ackResult: TerminateAckResult) => {
     console.log(new Date().toISOString() + ": <<TERM-ACK>> api server instance " + InstanceId + " <ACK> the termination request, ackResult=" + JSON.stringify(ackResult));
+}).on("instance-terminated", (InstanceId: ServerId) => {
+    console.log(new Date().toISOString() + ": <<TERMINATED>> on api server instance " + InstanceId + " has successfully terminated :-)");
 });
 
 let appAdmin = express();

@@ -7,9 +7,10 @@ import * as msgtx from "./msg-transaction";
 import {MsgTopic} from "../utils";
 
 export interface IApiServerMessenger {
-    notifyToTerminate(InstanceId: string): void;
+    requestToTerminate(InstanceId: string): void;
     queryState(InstanceId: string, QueryId: string): void;
     on(event: "instance-launched", listener: (InstanceId: ServerId) => void) : this;
+    on(event: "instance-terminate-req", listener: (InstanceId: ServerId) => void) : this;
     on(event: "instance-terminate-ack", listener: (InstanceId: ServerId, ackResult: TerminateAckResult) => void) : this;
     on(event: "instance-terminated", listener: (InstanceId: ServerId) => void): this;
     on(event: "transaction-res-rcvd", listener: (TransactionId: msgtx.TransactionId, result: any) => void) : this;
@@ -43,7 +44,8 @@ class ApiServerMessenger extends events.EventEmitter implements IApiServerMessen
             this.emit("instance-terminated", InstanceId);
         });
     }
-    notifyToTerminate(InstanceId: ServerId): void {
+    requestToTerminate(InstanceId: ServerId): void {
+        this.emit("instance-terminate-req", InstanceId);
         let msg: Message = {type: "terminate-req"};
         this.connectionsManager.dispatchMessage(MsgTopic.getApiServerInstanceTopic(InstanceId), {}, msg);
     }

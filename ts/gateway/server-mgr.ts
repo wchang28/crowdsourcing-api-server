@@ -6,7 +6,7 @@ import * as path from 'path';
 import {ServerId} from "../message";
 
 export interface IServerMessenger {
-    notifyToTerminate(InstanceId: string): void;
+    requestToTerminate(InstanceId: string): void;
     on(event: "instance-launched", listener: (InstanceId: ServerId) => void) : this;
     on(event: "instance-terminated", listener: (InstanceId: ServerId) => void): this;
 }
@@ -51,7 +51,7 @@ class ServerManager extends events.EventEmitter implements sm.IServerManager {
         let ServerInstnace: sm.ServerInstance = {Id: InstanceId, InstanceUrl};
         return this.launchNewApiServerInstance(InstanceId, Port).then(() => Promise.resolve<sm.ServerInstance>(ServerInstnace));  
     }
-    terminateInstance(InstanceId: string) : void {this.serverMessenger.notifyToTerminate(InstanceId);}
+    terminateInstance(InstanceId: string) : void {this.serverMessenger.requestToTerminate(InstanceId);}
 }
 
 export function get(availablePorts: [number, number], msgPort: number, NODE_PATH: string, serverMessenger: IServerMessenger) : sm.IServerManager {return new ServerManager(availablePorts, msgPort, NODE_PATH, serverMessenger);}
