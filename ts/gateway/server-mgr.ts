@@ -3,11 +3,11 @@ import * as sm from "./state-machine";
 import * as uuid from "uuid";
 import * as cp from "child_process"; 
 import * as path from 'path';
-import {ServerId} from "../message";
+import {ServerId, ApiServerReadyResult} from "../message";
 
 export interface IServerMessenger {
     requestToTerminate(InstanceId: string): void;
-    on(event: "instance-launched", listener: (InstanceId: ServerId) => void) : this;
+    on(event: "instance-launched", listener: (InstanceId: ServerId, readyResult: ApiServerReadyResult) => void) : this;
     on(event: "instance-terminated", listener: (InstanceId: ServerId) => void): this;
 }
 
@@ -21,7 +21,7 @@ class ServerManager extends events.EventEmitter implements sm.IServerManager {
     constructor(availablePorts: [number, number], private msgPort: number, private NODE_PATH: string, private serverMessenger: IServerMessenger) {
         super();
         this._ports = [{Port:availablePorts[0], InstanceId: null}, {Port:availablePorts[1], InstanceId: null}];
-        this.serverMessenger.on("instance-launched", (InstanceId: ServerId) => {
+        this.serverMessenger.on("instance-launched", (InstanceId: ServerId, readyResult: ApiServerReadyResult) => {
             this.emit("instance-launched", InstanceId);
         }).on("instance-terminated", (InstanceId: ServerId) => {
             for (let i in this._ports) {

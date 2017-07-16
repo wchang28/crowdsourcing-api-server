@@ -3,7 +3,7 @@ import {IWebServerConfig, startServer} from 'express-web-server';
 import * as rc from "express-req-counter";
 import * as rcf from "rcf";
 import * as node$ from "rest-node";
-import {Message, ReadyContent, ApiServerStateQuery, ApiServerStateQueryResult, TerminateAckResult} from "../message";
+import {Message, ApiServerReadyResult, ApiServerStateQuery, ApiServerStateQueryResult, TerminateAckResult} from "../message";
 import * as af from "./app-factory";
 import {MsgTopic} from "../utils";
 
@@ -102,7 +102,7 @@ if (Mode === "deploy") {
             startApiAppServer(appFactory, Port, () => {
                 // inform the API gateway that we are ready to receive API calls
                 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                let content: ReadyContent = {InstanceId, NODE_PATH};
+                let content: ApiServerReadyResult = {InstanceId, NODE_PATH};
                 let msg: Message = {type: "ready", content};
                 msgClient.send(MsgTopic.getApiGetewayTopic(), {}, msg).then(() => {
                     console.log(new Date().toISOString() + ": <<ready>> message sent");

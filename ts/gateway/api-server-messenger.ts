@@ -1,7 +1,7 @@
 import * as express from 'express';
 import * as events from "events";
 import * as tr from 'rcf-message-router';
-import {Message, ServerId, ReadyContent, ApiServerStateQuery, ApiServerStateQueryResult, TerminateAckResult} from "../message";
+import {Message, ServerId, ApiServerReadyResult, ApiServerStateQuery, ApiServerStateQueryResult, TerminateAckResult} from "../message";
 import * as svrmgr from "./server-mgr";
 import * as msgtx from "./msg-transaction";
 import {MsgTopic} from "../utils";
@@ -9,7 +9,7 @@ import {MsgTopic} from "../utils";
 export interface IApiServerMessenger {
     requestToTerminate(InstanceId: string): void;
     queryState(InstanceId: string, QueryId: string): void;
-    on(event: "instance-launched", listener: (InstanceId: ServerId) => void) : this;
+    on(event: "instance-launched", listener: (InstanceId: ServerId, readyResult: ApiServerReadyResult) => void) : this;
     on(event: "instance-terminate-req", listener: (InstanceId: ServerId) => void) : this;
     on(event: "instance-terminate-ack", listener: (InstanceId: ServerId, ackResult: TerminateAckResult) => void) : this;
     on(event: "instance-terminated", listener: (InstanceId: ServerId) => void): this;
@@ -23,14 +23,10 @@ class ApiServerMessenger extends events.EventEmitter implements IApiServerMessen
             if (params.destination === '/topic/gateway') {
                 let msg:Message = params.body;
                 if (msg.type === "ready") {
-                    let content: ReadyContent = msg.content;
+                    let content: ApiServerReadyResult = msg.content;
                     let InstanceId = content.InstanceId;
-                    if (content.NODE_PATH)
-                        console.log(new Date().toISOString() + ": NEW server reported NODE_PATH=" + content.NODE_PATH);
-                    else
-                        console.error(new Date().toISOString() + "!!! Error: server did not receive NODE_PATH env. variable");
                     connection.cookie = InstanceId;
-                    this.emit("instance-launched", InstanceId);
+                    this.emit("instance-launched", InstanceId, content);
                 } else if (msg.type === "api-state") {
                     let content: ApiServerStateQueryResult = msg.content;
                     this.emit("transaction-res-rcvd", content.QueryId, content.State);
