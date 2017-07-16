@@ -21,11 +21,11 @@ function getSetApiServerMiddleware(getApiServerFromRequestData: (rqd: RequestDat
     };
 }
 
-let serverItemRouter = express.Router();
+let serverRouter = express.Router();
 
-router.use("/curr", getSetApiServerMiddleware((rqd: RequestData) => rqd.StateMachine.CurrentServer), serverItemRouter);
-router.use("/new", getSetApiServerMiddleware((rqd: RequestData) => rqd.StateMachine.NewServer), serverItemRouter);
-router.use("/old", getSetApiServerMiddleware((rqd: RequestData) => rqd.StateMachine.OldServer), serverItemRouter);
+router.use("/curr", getSetApiServerMiddleware((rqd: RequestData) => rqd.StateMachine.CurrentServer), serverRouter);
+router.use("/new", getSetApiServerMiddleware((rqd: RequestData) => rqd.StateMachine.NewServer), serverRouter);
+router.use("/old", getSetApiServerMiddleware((rqd: RequestData) => rqd.StateMachine.OldServer), serverRouter);
 
 class QueryApiServerStateTx implements ITransaction {
     constructor(public APIServer: Server, private apiServerMessenger: IApiServerMessenger) {}
@@ -36,6 +36,6 @@ class QueryApiServerStateTx implements ITransaction {
     toJSON(): Server {return this.APIServer;}
 }
 
-serverItemRouter.get("/state", RequestData.Endware<msg.ApiServerState>((rqd: RequestData) => {
+serverRouter.get("/state", RequestData.Endware<msg.ApiServerState>((rqd: RequestData) => {
     return rqd.APIServerMsgTransaction.execute<msg.ApiServerState>(new QueryApiServerStateTx(rqd.APIServer, rqd.APIServerMessenger));
 }));

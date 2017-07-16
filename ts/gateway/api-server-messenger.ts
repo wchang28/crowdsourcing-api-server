@@ -38,14 +38,15 @@ class ApiServerMessenger extends events.EventEmitter implements IApiServerMessen
             this.emit("instance-terminated", InstanceId);
         });
     }
+    private getAPIServerTopic(InstanceId: string) {return "/topic/"+ InstanceId;}
     notifyToTerminate(InstanceId: string): void {
         let msg: Message = {type: "terminate"};
-        this.connectionsManager.dispatchMessage("/topic/"+ InstanceId, {}, msg);
+        this.connectionsManager.dispatchMessage(this.getAPIServerTopic(InstanceId), {}, msg);
     }
     queryState(InstanceId: string, QueryId: string): void {
         let content: ApiServerStateQuery = {QueryId};
         let msg: Message = {type: "api-state-query", content};
-        this.connectionsManager.dispatchMessage("/topic/"+ InstanceId, {}, msg);
+        this.connectionsManager.dispatchMessage(this.getAPIServerTopic(InstanceId), {}, msg);
     }
 }
 
