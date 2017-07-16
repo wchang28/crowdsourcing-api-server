@@ -13,11 +13,14 @@ export interface ApiServerStateQuery {
     QueryId: string;
 }
 
-// MsgType = "api-state"
 export interface ApiServerState {
-    QueryId: string;
     InstanceId: ServerId;
     RequestCounter: number;
+}
+
+// MsgType = "api-state"
+export interface ApiServerStateQueryResult extends ApiServerStateQuery {
+    State: ApiServerState;
 }
 
 export interface Message {

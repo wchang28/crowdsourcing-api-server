@@ -11,10 +11,11 @@ import {get as getServerManager, IServerMessenger} from "./server-mgr";
 import * as sm from "./state-machine";
 import * as tr from 'rcf-message-router';
 import {Router as msgRouter, ConnectionsManager} from "./msg";
-import {Message, ServerId, ReadyContent} from "../message";
+import {Message, ServerId, ReadyContent, ApiServerStateQueryResult} from "../message";
 import {IGlobal} from "./global";
 import {Router as servicesRouter} from "./services";
 import * as proxy from "express-http-proxy";
+import * as msgtx from "./msg-transaction";
 
 let configFile: string = null;
 
@@ -41,7 +42,7 @@ startServer(config.msgServerConfig, appMsg, (secure:boolean, host:string, port:n
     process.exit(1);
 });
 
-class ServerMessenger extends events.EventEmitter implements IServerMessenger {
+class ServerMessenger extends events.EventEmitter implements IServerMessenger, msgtx.ITransactionReceiver {
     constructor(private connectionsManager: tr.IConnectionsManager) {
         super();
         this.connectionsManager.on("on_client_send_msg", (req:express.Request, connection: tr.ITopicConnection, params: tr.SendMsgParams) => {
@@ -56,6 +57,9 @@ class ServerMessenger extends events.EventEmitter implements IServerMessenger {
                         console.error(new Date().toISOString() + "!!! Error: server did not receive NODE_PATH env. variable");
                     connection.cookie = InstanceId;
                     this.emit("instance-launched", InstanceId);
+                } else if (msg.type === "api-state") {
+                    let content: ApiServerStateQueryResult = msg.content;
+                    this.emit("transaction-res-rcvd", content.QueryId, content.State);
                 }
             }
         }).on("client_disconnect", (req:express.Request, connection: tr.ITopicConnection) => {
@@ -92,6 +96,8 @@ stateMachine.on("ready", () => {    // api server is ready => get the proxy read
     console.error(new Date().toISOString() + ': !!! Error: ' + JSON.stringify(err));
 });
 
+let apiMsgTransaction = msgtx.get(serverMessanger, {timeoutMS: 15000});
+
 let appAdmin = express();
 appAdmin.set('jsonp callback name', 'cb');
 appAdmin.use(noCache);
@@ -100,6 +106,7 @@ appAdmin.use(prettyPrinter.get());
 
 let g: IGlobal = {
     stateMachine
+    ,apiMsgTransaction
 };
 
 appAdmin.set("global", g);
