@@ -3,7 +3,7 @@ import * as events from "events";
 import * as tr from 'rcf-message-router';
 import {Message, ServerId, ApiServerReadyResult, ApiServerStateQuery, ApiServerStateQueryResult, TerminateAckResult} from "../message";
 import * as svrmgr from "./server-mgr";
-import * as msgtx from "./msg-transaction";
+import * as msgtxp from "./msg-transaction-processor";
 import {MsgTopic} from "../utils";
 
 export interface IApiServerMessenger {
@@ -13,7 +13,7 @@ export interface IApiServerMessenger {
     on(event: "instance-terminate-req", listener: (InstanceId: ServerId) => void) : this;
     on(event: "instance-terminate-ack", listener: (InstanceId: ServerId, ackResult: TerminateAckResult) => void) : this;
     on(event: "instance-terminated", listener: (InstanceId: ServerId) => void): this;
-    on(event: "transaction-res-rcvd", listener: (TransactionId: msgtx.TransactionId, result: any) => void) : this;
+    on(event: "transaction-res-rcvd", listener: (TransactionId: msgtxp.TransactionId, result: any) => void) : this;
 }
 
 class ApiServerMessenger extends events.EventEmitter implements IApiServerMessenger {

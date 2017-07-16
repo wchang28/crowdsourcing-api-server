@@ -23,10 +23,10 @@ export interface Options {
     timeoutMS?: number;
 }
 
-export interface IMsgTransaction {
+export interface IMsgTransactionProcessor {
     readonly Options: Options;
     execute<T>(transaction: ITransaction) : Promise<T>;
-    toJSON() : MsgTransactionJSON;
+    toJSON() : MsgTransactionProcessorJSON;
 
     on(event: "change", listener: () => void) : this;
     on(event: "transaction-id-generated", listener: (TransactionId: TransactionId, transaction: ITransaction) => void) : this;
@@ -36,7 +36,7 @@ export interface IMsgTransaction {
     on(event: "transaction-success", listener: (TransactionId: TransactionId, transaction: ITransaction, result: any) => void) : this;
 }
 
-export interface MsgTransactionJSON {
+export interface MsgTransactionProcessorJSON {
     Options: Options;
     PendingCount: number;
     PendingTransactions: {Id:TransactionId, Transaction: any}[];
@@ -46,7 +46,7 @@ let defautOptions: Options = {
     timeoutMS: 15000
 }
 
-class MsgTransaction extends events.EventEmitter implements IMsgTransaction {
+class MsgTransactionProcessor extends events.EventEmitter implements IMsgTransactionProcessor {
     private __options: Options;
     private __pending: {[TransactionId: string]: TransactionItem}; // map from transaction id to TransactionItem
     constructor(private __receiver: ITransactionReceiver, options?: Options) {
@@ -93,8 +93,8 @@ class MsgTransaction extends events.EventEmitter implements IMsgTransaction {
             });
         });
     }
-    toJSON() : MsgTransactionJSON {
-        let ret: MsgTransactionJSON = {Options: this.Options, PendingCount:0, PendingTransactions: []};
+    toJSON() : MsgTransactionProcessorJSON {
+        let ret: MsgTransactionProcessorJSON = {Options: this.Options, PendingCount:0, PendingTransactions: []};
         for (let TransactionId in this.__pending)
             ret.PendingTransactions.push({Id: TransactionId, Transaction: this.__pending[TransactionId].transaction.toJSON()});
         ret.PendingCount = ret.PendingTransactions.length;
@@ -102,4 +102,4 @@ class MsgTransaction extends events.EventEmitter implements IMsgTransaction {
     }
 }
 
-export function get(receiver: ITransactionReceiver, options?: Options) : IMsgTransaction {return new MsgTransaction(receiver, options);}
+export function get(receiver: ITransactionReceiver, options?: Options) : IMsgTransactionProcessor {return new MsgTransactionProcessor(receiver, options);}

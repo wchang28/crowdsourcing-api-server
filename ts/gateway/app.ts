@@ -14,7 +14,7 @@ import * as messenger from "./api-server-messenger";
 import {IGlobal} from "./global";
 import {Router as servicesRouter} from "./services";
 import * as proxy from "express-http-proxy";
-import * as msgtx from "./msg-transaction";
+import * as msgtxp from "./msg-transaction-processor";
 import {ServerId, ApiServerReadyResult, TerminateAckResult} from "../message";
 
 let configFile: string = null;
@@ -43,7 +43,7 @@ startServer(config.msgServerConfig, appMsg, (secure:boolean, host:string, port:n
 });
 
 let apiServerMessenger = messenger.get(connectionsManager);
-let apiServerMsgTransaction = msgtx.get(apiServerMessenger, {timeoutMS: 15000});
+let apiServerMsgTransactionProcessor = msgtxp.get(apiServerMessenger, {timeoutMS: 15000});
 let serverManager = srvMgr.get(config.availableApiServerPorts, config.msgServerConfig.http.port, config.NODE_PATH, apiServerMessenger);
 let stateMachine = sm.get(serverManager);
 
@@ -93,7 +93,7 @@ let g: IGlobal = {
     stateMachine
     ,connectionsManager
     ,apiServerMessenger
-    ,apiServerMsgTransaction
+    ,apiServerMsgTransactionProcessor
 };
 
 appAdmin.set("global", g);

@@ -4,7 +4,7 @@ import {RequestData} from "../../request-data";
 import * as msg from "../../../message";
 import {Server} from "../../state-machine";
 import {IApiServerMessenger} from "../../api-server-messenger"
-import {ITransaction, TransactionId} from "../../msg-transaction";
+import {ITransaction, TransactionId} from "../../msg-transaction-processor";
 
 let router = express.Router();
 export {router as Router};
@@ -37,5 +37,5 @@ class QueryApiServerStateTx implements ITransaction {
 }
 
 serverRouter.get("/state", RequestData.Endware<msg.ApiServerState>((rqd: RequestData) => {
-    return rqd.APIServerMsgTransaction.execute<msg.ApiServerState>(new QueryApiServerStateTx(rqd.APIServer, rqd.APIServerMessenger));
+    return rqd.APIServerMsgTransactionProcessor.execute<msg.ApiServerState>(new QueryApiServerStateTx(rqd.APIServer, rqd.APIServerMessenger));
 }));
