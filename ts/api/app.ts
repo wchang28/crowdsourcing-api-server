@@ -50,7 +50,7 @@ function flagTerminationPending() {
         process.exit(0);
 }
 
-reqCounter.on("zero-count", () => {
+reqCounter.on("zero-count", () => { // request counter reach zero
     if (terminationPending)
         process.exit(0);
 })
