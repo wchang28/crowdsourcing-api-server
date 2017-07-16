@@ -49,7 +49,7 @@ let stateMachine = sm.get(serverManager);
 
 apiServerMessenger.on("instance-launched", (InstanceId: ServerId, readyResult: ApiServerReadyResult) => {
     if (readyResult.NODE_PATH)
-        console.log(new Date().toISOString() + ": <<LAUNCHED>> new server instance " + InstanceId + " reported NODE_PATH=" + readyResult.NODE_PATH);
+        console.log(new Date().toISOString() + ": <<LAUNCHED>> new server instance " + InstanceId + " reported NODE_PATH=" + readyResult.NODE_PATH + ":-)");
     else
         console.error(new Date().toISOString() + "!!! Error: new server did not receive NODE_PATH env. variable");
 }).on("instance-terminate-req", (InstanceId: ServerId) => {
