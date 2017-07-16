@@ -60,6 +60,10 @@ apiServerMessenger.on("instance-launched", (InstanceId: ServerId, readyResult: A
     console.log(new Date().toISOString() + ": <<TERMINATED>> on api server instance " + InstanceId + " has successfully terminated :-)");
 });
 
+serverManager.on("instance-launching", (InstanceId: ServerId, InstanceUrl: string) => {
+    console.log(new Date().toISOString() + ": <<LAUNCHING>> new server instance " + InstanceId + " on " + InstanceUrl);
+});
+
 stateMachine.on("ready", () => {    // api server is ready => get the proxy ready
     console.log(new Date().toISOString() + ': state machine reports a <ready> state. starting the api proxy server...');
     let appProxy = express();
