@@ -15,6 +15,7 @@ import {IGlobal} from "./global";
 import {Router as servicesRouter} from "./services";
 import * as proxy from "express-http-proxy";
 import * as msgtx from "./msg-transaction";
+import {ServerId, TerminateAckResult} from "../message";
 
 let configFile: string = null;
 
@@ -63,6 +64,10 @@ stateMachine.on("ready", () => {    // api server is ready => get the proxy read
     console.log(new Date().toISOString() + ": <<change>> state=" + stateMachine.State);
 }).on("error", (err: any) => {
     console.error(new Date().toISOString() + ': !!! Error: ' + JSON.stringify(err));
+});
+
+apiServerMessenger.on("instance-terminate-ack", (InstanceId: ServerId, ackResult: TerminateAckResult) => {
+    console.log(new Date().toISOString() + ": api server instance " + InstanceId + " <ACK> the termination request, ackResult=" + JSON.stringify(ackResult));
 });
 
 let appAdmin = express();
