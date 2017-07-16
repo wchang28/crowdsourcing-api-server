@@ -9,7 +9,7 @@ import {IAppConfig} from './app-config';
 import * as events from "events";
 import * as srvMgr from "./server-mgr";
 import * as sm from "./state-machine";
-import {Router as msgRouter, ConnectionsManager} from "./msg";
+import {Router as msgRouter, ConnectionsManager as connectionsManager} from "./msg";
 import * as messenger from "./api-server-messenger";
 import {IGlobal} from "./global";
 import {Router as servicesRouter} from "./services";
@@ -42,7 +42,7 @@ startServer(config.msgServerConfig, appMsg, (secure:boolean, host:string, port:n
     process.exit(1);
 });
 
-let apiServerMessenger = messenger.get(ConnectionsManager);
+let apiServerMessenger = messenger.get(connectionsManager);
 let apiServerMsgTransaction = msgtx.get(apiServerMessenger, {timeoutMS: 15000});
 let serverManager = srvMgr.get(config.availableApiServerPorts, config.msgServerConfig.http.port, config.NODE_PATH, apiServerMessenger);
 let stateMachine = sm.get(serverManager);
@@ -91,6 +91,7 @@ appAdmin.use(prettyPrinter.get());
 
 let g: IGlobal = {
     stateMachine
+    ,connectionsManager
     ,apiServerMessenger
     ,apiServerMsgTransaction
 };

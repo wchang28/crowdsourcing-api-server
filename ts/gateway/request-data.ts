@@ -2,6 +2,7 @@ import * as express from 'express';
 import {IGlobal} from "./global";
 import * as http from "http";
 import {IStateMachine, Server} from "./state-machine";
+import {IConnectionsManager} from 'rcf-message-router';
 import {IApiServerMessenger} from "./api-server-messenger";
 import {IMsgTransaction} from "./msg-transaction";
 
@@ -32,6 +33,7 @@ export class RequestData {
     }
 
     get StateMachine() : IStateMachine {return this.Global.stateMachine;}
+    get ConnectionsManager(): IConnectionsManager {return this.Global.connectionsManager;}
     get APIServerMessenger() : IApiServerMessenger {return this.Global.apiServerMessenger;}
     get APIServerMsgTransaction() : IMsgTransaction {return this.Global.apiServerMsgTransaction;}
 
