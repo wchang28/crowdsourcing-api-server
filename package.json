@@ -27,6 +27,7 @@
     "rcf": "https://github.com/wchang28/rcf.git",
     "rcf-message-router": "https://github.com/wchang28/rcf-message-router.git",
     "rest-node": "https://github.com/wchang28/rest-node.git",
+    "shortid": "^2.2.8",
     "uuid": "^3.1.0"
   }
 }
