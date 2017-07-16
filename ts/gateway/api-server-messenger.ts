@@ -4,6 +4,7 @@ import * as tr from 'rcf-message-router';
 import {Message, ServerId, ReadyContent, ApiServerStateQuery, ApiServerStateQueryResult} from "../message";
 import * as svrmgr from "./server-mgr";
 import * as msgtx from "./msg-transaction";
+import {MsgTopic} from "../utils";
 
 export interface IApiServerMessenger {
     notifyToTerminate(InstanceId: string): void;
@@ -38,15 +39,14 @@ class ApiServerMessenger extends events.EventEmitter implements IApiServerMessen
             this.emit("instance-terminated", InstanceId);
         });
     }
-    private getAPIServerTopic(InstanceId: string) {return "/topic/"+ InstanceId;}
-    notifyToTerminate(InstanceId: string): void {
+    notifyToTerminate(InstanceId: ServerId): void {
         let msg: Message = {type: "terminate"};
-        this.connectionsManager.dispatchMessage(this.getAPIServerTopic(InstanceId), {}, msg);
+        this.connectionsManager.dispatchMessage(MsgTopic.getApiServerInstanceTopic(InstanceId), {}, msg);
     }
-    queryState(InstanceId: string, QueryId: string): void {
+    queryState(InstanceId: ServerId, QueryId: string): void {
         let content: ApiServerStateQuery = {QueryId};
         let msg: Message = {type: "api-state-query", content};
-        this.connectionsManager.dispatchMessage(this.getAPIServerTopic(InstanceId), {}, msg);
+        this.connectionsManager.dispatchMessage(MsgTopic.getApiServerInstanceTopic(InstanceId), {}, msg);
     }
 }
 

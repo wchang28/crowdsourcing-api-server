@@ -5,6 +5,7 @@ import * as rcf from "rcf";
 import * as node$ from "rest-node";
 import {Message, ReadyContent, ApiServerStateQuery, ApiServerStateQueryResult} from "../message";
 import * as af from "./app-factory";
+import {MsgTopic} from "../utils";
 
 let NODE_PATH = process.env["NODE_PATH"];
 let Mode : "deploy" | "debug" = null;
@@ -65,7 +66,7 @@ if (Mode === "deploy") {
     let msgClient = api.$M("/msg/events", {reconnetIntervalMS: 3000});
     msgClient.on("connect", (conn_id: string) => {
         console.log(new Date().toISOString() + ": connected to the gateway msg server :-) conn_id=" + conn_id);
-        msgClient.subscribe("/topic/" + InstanceId, (msg: rcf.IMessage) => {
+        msgClient.subscribe(MsgTopic.getApiServerInstanceTopic(InstanceId), (msg: rcf.IMessage) => {
             if (msg.body) {
                 let message : Message = msg.body;
                 if (message.type === "terminate") {
@@ -74,7 +75,7 @@ if (Mode === "deploy") {
                     let query: ApiServerStateQuery = message.content;
                     let content: ApiServerStateQueryResult = {QueryId: query.QueryId, State: {InstanceId, RequestCounter: reqCounter.Counter}};
                     let msg: Message = {type: "api-state", content};
-                    msgClient.send("/topic/gateway", {}, msg).then(() => {
+                    msgClient.send(MsgTopic.getApiGetewayTopic(), {}, msg).then(() => {
                         console.log(new Date().toISOString() + ": <<ready>> message sent");
                     }).catch((err: any) => {
                         console.error(new Date().toISOString() + ': !!! crowdsourcing api server error: ' + JSON.stringify(err));
@@ -87,7 +88,7 @@ if (Mode === "deploy") {
             startApiAppServer(appFactory, Port, () => {
                 let content: ReadyContent = {InstanceId, NODE_PATH};
                 let msg: Message = {type: "ready", content};
-                msgClient.send("/topic/gateway", {}, msg).then(() => {
+                msgClient.send(MsgTopic.getApiGetewayTopic(), {}, msg).then(() => {
                     console.log(new Date().toISOString() + ": <<ready>> message sent");
                 }).catch((err: any) => {
                     console.error(new Date().toISOString() + ': !!! crowdsourcing api server error: ' + JSON.stringify(err));
