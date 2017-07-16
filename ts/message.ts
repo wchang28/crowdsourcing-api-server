@@ -1,6 +1,6 @@
 export type ServerId = string;
 
-export type MsgType = "ready" | "terminate" | "api-state-query" | "api-state";
+export type MsgType = "ready" | "terminate" | "treminate-ack" | "api-state-query" | "api-state";
 
 //  MsgType = "ready"
 export interface ReadyContent {
@@ -17,6 +17,9 @@ export interface ApiServerState {
     InstanceId: ServerId;
     RequestCounter: number;
 }
+
+// MsgType = "treminate-ack"
+export type TerminateAckResult = ApiServerState;
 
 // MsgType = "api-state"
 export interface ApiServerStateQueryResult extends ApiServerStateQuery {

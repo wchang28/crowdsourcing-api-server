@@ -74,7 +74,7 @@ class StateMachine extends events.EventEmitter implements IStateMachine {
                     this._newServer.State = "ready";
                     this._currentServer = this._newServer;
                     this._newServer = null;
-                    this.serverManager.terminateInstance(this._oldServer.Id);
+                    this.serverManager.terminateInstance(this._oldServer.Id);   // try to terminate the old instance
                 }
                 if (typeof this._newServerLaunchCompletionCallback === "function") {
                     this._newServerLaunchCompletionCallback(null);

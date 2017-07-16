@@ -3,7 +3,7 @@ import {IWebServerConfig, startServer} from 'express-web-server';
 import * as rc from "express-req-counter";
 import * as rcf from "rcf";
 import * as node$ from "rest-node";
-import {Message, ReadyContent, ApiServerStateQuery, ApiServerStateQueryResult} from "../message";
+import {Message, ReadyContent, ApiServerStateQuery, ApiServerStateQueryResult, TerminateAckResult} from "../message";
 import * as af from "./app-factory";
 import {MsgTopic} from "../utils";
 
@@ -70,22 +70,38 @@ if (Mode === "deploy") {
             if (msg.body) {
                 let message : Message = msg.body;
                 if (message.type === "terminate") {
-                    flagTerminationPending();
+                    // got a termination request from the api gateway => acknowledge it by responding with our current state
+                    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    let content: TerminateAckResult = {InstanceId, RequestCounter: reqCounter.Counter};
+                    let msg: Message = {type: "treminate-ack", content};
+                    msgClient.send(MsgTopic.getApiGetewayTopic(), {}, msg).then(() => {
+                        console.log(new Date().toISOString() + ": <<treminate-ack>> message sent");
+                        flagTerminationPending();
+                    }).catch((err: any) => {
+                        console.error(new Date().toISOString() + ': !!! crowdsourcing api server error: ' + JSON.stringify(err));
+                        flagTerminationPending();
+                    });
+                    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 } else if (message.type === "api-state-query") {
+                    // got a state query request from the api gateway => respond with our current state
+                    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     let query: ApiServerStateQuery = message.content;
                     let content: ApiServerStateQueryResult = {QueryId: query.QueryId, State: {InstanceId, RequestCounter: reqCounter.Counter}};
                     let msg: Message = {type: "api-state", content};
                     msgClient.send(MsgTopic.getApiGetewayTopic(), {}, msg).then(() => {
-                        console.log(new Date().toISOString() + ": <<ready>> message sent");
+                        console.log(new Date().toISOString() + ": <<api-state>> message sent");
                     }).catch((err: any) => {
                         console.error(new Date().toISOString() + ': !!! crowdsourcing api server error: ' + JSON.stringify(err));
                         process.exit(1);
                     });
+                    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 }
             }
         }).then((sub_id: string) => {
             console.log(new Date().toISOString() + ": topic subscription successful, sub_id=" + sub_id);
             startApiAppServer(appFactory, Port, () => {
+                // inform the API gateway that we are ready to receive API calls
+                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 let content: ReadyContent = {InstanceId, NODE_PATH};
                 let msg: Message = {type: "ready", content};
                 msgClient.send(MsgTopic.getApiGetewayTopic(), {}, msg).then(() => {
@@ -94,6 +110,7 @@ if (Mode === "deploy") {
                     console.error(new Date().toISOString() + ': !!! crowdsourcing api server error: ' + JSON.stringify(err));
                     process.exit(1);
                 });
+                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             });
         }).catch((err: any) => {
             console.error(new Date().toISOString() + ': !!! Error subscribing to topic: ' + JSON.stringify(err));
