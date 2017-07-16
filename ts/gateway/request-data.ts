@@ -1,11 +1,12 @@
 import * as express from 'express';
 import {IGlobal} from "./global";
 import * as http from "http";
-import {IStateMachine} from "./state-machine";
+import {IStateMachine, Server} from "./state-machine";
 import {IApiServerMessenger} from "./api-server-messenger";
 import {IMsgTransaction} from "./msg-transaction";
 
 interface RequestInfo {
+    apiServer?: Server;
 }
 
 export type EndwareHandler<T> = (rqd: RequestData) => Promise<T>;
@@ -33,4 +34,7 @@ export class RequestData {
     get StateMachine() : IStateMachine {return this.Global.stateMachine;}
     get APIServerMessenger() : IApiServerMessenger {return this.Global.apiServerMessenger;}
     get APIServerMsgTransaction() : IMsgTransaction {return this.Global.apiServerMsgTransaction;}
+
+    get APIServer(): Server {return this.RequestInfo.apiServer;}
+    set APIServer(value: Server) {this.RequestInfo.apiServer = value;}
 } 
