@@ -4,6 +4,7 @@ import {IMsgTransactionProcessor} from "msg-transaction-processor";
 import {IConnectionsManager} from 'rcf-message-router';
 
 export interface IGlobal {
+    NODE_PATH: string;
     stateMachine: IStateMachine;
     connectionsManager: IConnectionsManager;
     apiServerMessenger: IApiServerMessenger;

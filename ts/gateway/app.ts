@@ -90,7 +90,8 @@ appAdmin.use(bodyParser.json({"limit":"999mb"}));
 appAdmin.use(prettyPrinter.get());
 
 let g: IGlobal = {
-    stateMachine
+    NODE_PATH: config.NODE_PATH
+    ,stateMachine
     ,connectionsManager
     ,apiServerMessenger
     ,apiServerMsgTransactionProcessor

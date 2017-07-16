@@ -4,6 +4,7 @@ import * as core from 'express-serve-static-core';
 import {RequestData} from "../request-data";
 import {StateMachineJSON, State} from "../state-machine";
 import {Router as serverRouter} from "./server";
+import {Router as apiRouter} from "./api";
 import {ITopicConnectionJSON} from 'rcf-message-router';
 
 let router = express.Router();

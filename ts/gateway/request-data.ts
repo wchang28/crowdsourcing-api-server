@@ -31,7 +31,8 @@ export class RequestData {
             });
         };
     }
-
+    
+    get NODE_PATH(): string {return this.Global.NODE_PATH;}
     get StateMachine() : IStateMachine {return this.Global.stateMachine;}
     get ConnectionsManager(): IConnectionsManager {return this.Global.connectionsManager;}
     get APIServerMessenger() : IApiServerMessenger {return this.Global.apiServerMessenger;}
