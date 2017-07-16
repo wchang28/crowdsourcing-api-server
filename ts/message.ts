@@ -1,6 +1,6 @@
 export type ServerId = string;
 
-export type MsgType = "ready" | "terminate" | "treminate-ack" | "api-state-query" | "api-state";
+export type MsgType = "ready" | "terminate-req" | "treminate-ack" | "api-state-query" | "api-state";
 
 //  MsgType = "ready"
 export interface ReadyContent {

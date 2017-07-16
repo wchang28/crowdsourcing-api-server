@@ -69,7 +69,7 @@ if (Mode === "deploy") {
         msgClient.subscribe(MsgTopic.getApiServerInstanceTopic(InstanceId), (msg: rcf.IMessage) => {
             if (msg.body) {
                 let message : Message = msg.body;
-                if (message.type === "terminate") {
+                if (message.type === "terminate-req") {
                     // got a termination request from the api gateway => acknowledge it by responding with our current state
                     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     let content: TerminateAckResult = {InstanceId, RequestCounter: reqCounter.Counter};
