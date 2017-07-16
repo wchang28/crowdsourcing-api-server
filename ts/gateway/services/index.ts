@@ -15,3 +15,4 @@ router.get("/state", RequestData.Endware<State>((rqd: RequestData) => Promise.re
 router.get("/deploy", RequestData.Endware<any>((rqd: RequestData) => rqd.StateMachine.deploy()));
 router.get("/connections", RequestData.Endware<ITopicConnectionJSON[]>((rqd: RequestData) => Promise.resolve<ITopicConnectionJSON[]>(rqd.ConnectionsManager.toJSON())));
 router.use("/server", serverRouter);
+router.use("/api", apiRouter);

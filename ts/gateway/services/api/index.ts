@@ -6,4 +6,4 @@ import * as apiExt from "../../../extensions";
 let router = express.Router();
 export {router as Router};
 
-router.get("/listing", RequestData.Endware<apiExt.ExtensionModule[]>((rqd: RequestData) => Promise.resolve<apiExt.ExtensionModule[]>(apiExt.getAllExtensionModules(rqd.NODE_PATH))));
+router.get("/", RequestData.Endware<apiExt.ExtensionModule[]>((rqd: RequestData) => Promise.resolve<apiExt.ExtensionModule[]>(apiExt.getAllExtensionModules(rqd.NODE_PATH))));
