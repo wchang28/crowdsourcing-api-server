@@ -11,12 +11,20 @@ export interface IServerMessenger {
     on(event: "instance-terminated", listener: (InstanceId: ServerId) => void): this;
 }
 
+export interface IServerManager {
+    launchNewInstance() : Promise<sm.ServerInstance>;
+    terminateInstance(InstanceId: ServerId) : void;
+    on(event: "instance-launching", listener: (InstanceId: ServerId, InstanceUrl: string) => void) : this;
+    on(event: "instance-launched", listener: (InstanceId: ServerId) => void) : this;
+    on(event: "instance-terminated", listener: (InstanceId: ServerId) => void): this;
+}
+
 interface PortItem {
     Port: number;
     InstanceId: ServerId;
 }
 
-class ServerManager extends events.EventEmitter implements sm.IServerManager {
+class ServerManager extends events.EventEmitter implements IServerManager {
     private _ports: [PortItem, PortItem];
     constructor(availablePorts: [number, number], private msgPort: number, private NODE_PATH: string, private serverMessenger: IServerMessenger) {
         super();
@@ -49,9 +57,10 @@ class ServerManager extends events.EventEmitter implements sm.IServerManager {
         let Port = this.useAvailablePort(InstanceId);
         let InstanceUrl = "http://127.0.0.1:" + Port.toString();
         let ServerInstnace: sm.ServerInstance = {Id: InstanceId, InstanceUrl};
+        this.emit("instance-launching", InstanceId, InstanceUrl);
         return this.launchNewApiServerInstance(InstanceId, Port).then(() => Promise.resolve<sm.ServerInstance>(ServerInstnace));  
     }
     terminateInstance(InstanceId: string) : void {this.serverMessenger.requestToTerminate(InstanceId);}
 }
 
-export function get(availablePorts: [number, number], msgPort: number, NODE_PATH: string, serverMessenger: IServerMessenger) : sm.IServerManager {return new ServerManager(availablePorts, msgPort, NODE_PATH, serverMessenger);}
+export function get(availablePorts: [number, number], msgPort: number, NODE_PATH: string, serverMessenger: IServerMessenger) : IServerManager {return new ServerManager(availablePorts, msgPort, NODE_PATH, serverMessenger);}
