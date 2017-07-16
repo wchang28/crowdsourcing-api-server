@@ -47,6 +47,19 @@ let apiServerMsgTransaction = msgtx.get(apiServerMessenger, {timeoutMS: 15000});
 let serverManager = srvMgr.get(config.availableApiServerPorts, config.msgServerConfig.http.port, config.NODE_PATH, apiServerMessenger);
 let stateMachine = sm.get(serverManager);
 
+apiServerMessenger.on("instance-launched", (InstanceId: ServerId, readyResult: ApiServerReadyResult) => {
+    if (readyResult.NODE_PATH)
+        console.log(new Date().toISOString() + ": <<LAUNCHED>> new server instance " + InstanceId + " reported NODE_PATH=" + readyResult.NODE_PATH);
+    else
+        console.error(new Date().toISOString() + "!!! Error: new server did not receive NODE_PATH env. variable");
+}).on("instance-terminate-req", (InstanceId: ServerId) => {
+    console.log(new Date().toISOString() + ": <<TERM-REQ>> request to terminate api server instance " + InstanceId);
+}).on("instance-terminate-ack", (InstanceId: ServerId, ackResult: TerminateAckResult) => {
+    console.log(new Date().toISOString() + ": <<TERM-ACK>> api server instance " + InstanceId + " <ACK> the termination request, ackResult=" + JSON.stringify(ackResult));
+}).on("instance-terminated", (InstanceId: ServerId) => {
+    console.log(new Date().toISOString() + ": <<TERMINATED>> on api server instance " + InstanceId + " has successfully terminated :-)");
+});
+
 stateMachine.on("ready", () => {    // api server is ready => get the proxy ready
     console.log(new Date().toISOString() + ': state machine reports a <ready> state. starting the api proxy server...');
     let appProxy = express();
@@ -64,19 +77,6 @@ stateMachine.on("ready", () => {    // api server is ready => get the proxy read
     console.log(new Date().toISOString() + ": <<change>> state=" + stateMachine.State);
 }).on("error", (err: any) => {
     console.error(new Date().toISOString() + ': !!! Error: ' + JSON.stringify(err));
-});
-
-apiServerMessenger.on("instance-launched", (InstanceId: ServerId, readyResult: ApiServerReadyResult) => {
-    if (readyResult.NODE_PATH)
-        console.log(new Date().toISOString() + ": <<LAUNCHED>> new server instance " + InstanceId + " reported NODE_PATH=" + readyResult.NODE_PATH);
-    else
-        console.error(new Date().toISOString() + "!!! Error: new server did not receive NODE_PATH env. variable");
-}).on("instance-terminate-req", (InstanceId: ServerId) => {
-    console.log(new Date().toISOString() + ": <<TERM-REQ>> request to terminate api server instance " + InstanceId);
-}).on("instance-terminate-ack", (InstanceId: ServerId, ackResult: TerminateAckResult) => {
-    console.log(new Date().toISOString() + ": <<TERM-ACK>> api server instance " + InstanceId + " <ACK> the termination request, ackResult=" + JSON.stringify(ackResult));
-}).on("instance-terminated", (InstanceId: ServerId) => {
-    console.log(new Date().toISOString() + ": <<TERMINATED>> on api server instance " + InstanceId + " has successfully terminated :-)");
 });
 
 let appAdmin = express();
