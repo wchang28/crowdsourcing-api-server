@@ -44,6 +44,7 @@ export interface IStateMachine {
     on(event: "change", listener: () => void) : this;
     on(event: "ready", listener: () => void) : this;
     on(event: "error", listener: (err: any) => void) : this;
+    on(event: "state-change", listener: (State: State) => void) : this;
 }
 
 class StateMachine extends events.EventEmitter implements IStateMachine {
@@ -71,12 +72,14 @@ class StateMachine extends events.EventEmitter implements IStateMachine {
                     this._currentServer = this._newServer;
                     this._newServer = null;
                     this.emit("ready");
+                    this.emit("state-change", this.State);
                 } else {    // "switching" => // "swtiched"
                     this._oldServer = this._currentServer;
                     this._oldServer.State = "terminating";
                     this._newServer.State = "ready";
                     this._currentServer = this._newServer;
                     this._newServer = null;
+                    this.emit("state-change", this.State);
                     this.serverManager.terminateInstance(this._oldServer.Id);   // try to terminate the old instance
                     if (this._oldServer.RequestCounter === 0) {
                         console.log("terminating condition met with server " + this._oldServer.Id + ", cond=#1");
@@ -92,6 +95,7 @@ class StateMachine extends events.EventEmitter implements IStateMachine {
             if (this.State === "switched") {
                 this._oldServer = null;
                 // back to "ready"
+                this.emit("state-change", this.State);
                 this.emit("change");
             }
         });
@@ -123,11 +127,13 @@ class StateMachine extends events.EventEmitter implements IStateMachine {
             return this.serverManager.launchNewInstance().then((Instance: ServerInstance) => {
                 this._newServer = {Id: Instance.Id, InstanceUrl: Instance.InstanceUrl, State: "initializing", RequestCounter: 0};
                 // "initializing" or "switching"
+                this.emit("state-change", this.State);
                 this.emit("change");
                 this._newServerLauncherTimer = setTimeout(() => {
                     this._newServerLauncherTimer = null;
                     this._newServer = null;
                     // back to "uninitizlized" or "ready"
+                    this.emit("state-change", this.State);
                     this.emit("change");
                     let err = {error: "timeout", error_description: "new server launch timeout"};
                     if (typeof this._newServerLaunchCompletionCallback === "function") {
@@ -173,16 +179,22 @@ class StateMachine extends events.EventEmitter implements IStateMachine {
         let server = this.getServerByInstanceId(InstanceId);
         if (server) {
             server.RequestCounter++;
+            console.log("counter inc. server=\n" + JSON.stringify(server, null, 2));
             this.emit("change");
         }
     }
     decrementRequestCounterByInstanceId(InstanceId: ServerId) {
         let server = this.getServerByInstanceId(InstanceId);
-        if (server && server.RequestCounter > 0) {
-            server.RequestCounter--;
-            this.emit("change");
-            if (server.State === "terminating" && server.RequestCounter === 0) {
-                console.log("terminating condition met with server " + server.Id + ", cond=#2");
+        if (server) {
+            if (server.RequestCounter > 0) {
+                server.RequestCounter--;
+                console.log("counter decrem. server=\n" + JSON.stringify(server, null, 2));
+                this.emit("change");
+                if (server.State === "terminating" && server.RequestCounter === 0) {
+                    console.log("terminating condition met with server " + server.Id + ", cond=#2");
+                }
+            } else {
+                console.log("!!! BAAAAD counter !!!");
             }
         }
     }

@@ -70,14 +70,16 @@ stateMachine.on("ready", () => {    // api server is ready => get the proxy read
     let requestCounterTrackingMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction) => {
         let InstanceId = stateMachine.CurrentServer.Id;
         stateMachine.incrementRequestCounterByInstanceId(InstanceId);
-        req.on("end", () => {
+        res.on("finish", () => {
+            console.log("res.finish()");
             stateMachine.decrementRequestCounterByInstanceId(InstanceId);
         });
         res.on("close", () => {
+            console.log("res.close()");
             stateMachine.decrementRequestCounterByInstanceId(InstanceId);
         });
         next();
-    }
+    };
     let targetAcquisition = (req: express.Request) => Promise.resolve<proxy.TargetSettings>({targetUrl: stateMachine.TargetInstanceUrl});
     appProxy.use("/", requestCounterTrackingMiddleware, proxy.get({targetAcquisition}));
 
@@ -88,8 +90,8 @@ stateMachine.on("ready", () => {    // api server is ready => get the proxy read
         console.error(new Date().toISOString() + ': !!! api gateway <PROXY> server error: ' + JSON.stringify(err));
         process.exit(1);
     });
-}).on("change", () => {
-    console.log(new Date().toISOString() + ": <<change>> state=" + stateMachine.State);
+}).on("state-change", (state: sm.State) => {
+    console.log(new Date().toISOString() + ": <<state-change>> state=" + state);
 }).on("error", (err: any) => {
     console.error(new Date().toISOString() + ': !!! Error: ' + JSON.stringify(err));
 });
