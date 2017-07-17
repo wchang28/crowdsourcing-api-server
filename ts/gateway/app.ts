@@ -67,8 +67,19 @@ serverManager.on("instance-launching", (InstanceId: ServerId, InstanceUrl: strin
 stateMachine.on("ready", () => {    // api server is ready => get the proxy ready
     console.log(new Date().toISOString() + ': state machine reports a <ready> state. starting the api proxy server...');
     let appProxy = express();
+    let requestCounterTrackingMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        let InstanceId = stateMachine.CurrentServer.Id;
+        stateMachine.incrementRequestCounterByInstanceId(InstanceId);
+        req.on("end", () => {
+            stateMachine.decrementRequestCounterByInstanceId(InstanceId);
+        });
+        res.on("close", () => {
+            stateMachine.decrementRequestCounterByInstanceId(InstanceId);
+        });
+        next();
+    }
     let targetAcquisition = (req: express.Request) => Promise.resolve<proxy.TargetSettings>({targetUrl: stateMachine.TargetInstanceUrl});
-    appProxy.use("/", proxy.get({targetAcquisition}));
+    appProxy.use("/", requestCounterTrackingMiddleware, proxy.get({targetAcquisition}));
 
     startServer(config.proxyServerConfig, appProxy, (secure:boolean, host:string, port:number) => {
         let protocol = (secure ? 'https' : 'http');

@@ -12,6 +12,7 @@ export interface ServerInstance {
 
 export interface Server extends ServerInstance {
     State: ServerState;
+    RequestCounter: number;
 }
 
 export interface IServerManager {
@@ -37,6 +38,8 @@ export interface IStateMachine {
     readonly CurrentServer : Server;
     readonly NewServer : Server;
     readonly OldServer : Server;
+    incrementRequestCounterByInstanceId(InstanceId: ServerId);
+    decrementRequestCounterByInstanceId(InstanceId: ServerId);
     toJSON() : StateMachineJSON;
     on(event: "change", listener: () => void) : this;
     on(event: "ready", listener: () => void) : this;
@@ -75,6 +78,9 @@ class StateMachine extends events.EventEmitter implements IStateMachine {
                     this._currentServer = this._newServer;
                     this._newServer = null;
                     this.serverManager.terminateInstance(this._oldServer.Id);   // try to terminate the old instance
+                    if (this._oldServer.RequestCounter === 0) {
+                        console.log("terminating condition met with server " + this._oldServer.Id + ", cond=#1");
+                    }
                 }
                 if (typeof this._newServerLaunchCompletionCallback === "function") {
                     this._newServerLaunchCompletionCallback(null);
@@ -115,7 +121,7 @@ class StateMachine extends events.EventEmitter implements IStateMachine {
             return Promise.reject({error: "invalid-request", error_description: "not ready"});
         else {
             return this.serverManager.launchNewInstance().then((Instance: ServerInstance) => {
-                this._newServer = {Id: Instance.Id, InstanceUrl: Instance.InstanceUrl, State: "initializing"};
+                this._newServer = {Id: Instance.Id, InstanceUrl: Instance.InstanceUrl, State: "initializing", RequestCounter: 0};
                 // "initializing" or "switching"
                 this.emit("change");
                 this._newServerLauncherTimer = setTimeout(() => {
@@ -151,6 +157,33 @@ class StateMachine extends events.EventEmitter implements IStateMachine {
                     reject(err);
                 });
             });
+        }
+    }
+    private getServerByInstanceId(InstanceId: ServerId) : Server {
+        if (this.CurrentServer && this.CurrentServer.Id === InstanceId)
+            return this.CurrentServer;
+        else if (this.NewServer && this.NewServer.Id === InstanceId)
+            return this.NewServer;
+        else if (this.OldServer && this.OldServer.Id === InstanceId)
+            return this.OldServer;
+        else
+            return null;
+    }
+    incrementRequestCounterByInstanceId(InstanceId: ServerId) {
+        let server = this.getServerByInstanceId(InstanceId);
+        if (server) {
+            server.RequestCounter++;
+            this.emit("change");
+        }
+    }
+    decrementRequestCounterByInstanceId(InstanceId: ServerId) {
+        let server = this.getServerByInstanceId(InstanceId);
+        if (server && server.RequestCounter > 0) {
+            server.RequestCounter--;
+            this.emit("change");
+            if (server.State === "terminating" && server.RequestCounter === 0) {
+                console.log("terminating condition met with server " + server.Id + ", cond=#2");
+            }
         }
     }
     get TargetInstanceUrl() : string {return (this._currentServer ? this._currentServer.InstanceUrl : null);}
