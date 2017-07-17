@@ -46,19 +46,21 @@ class ServerManager extends events.EventEmitter implements IServerManager {
         this._ports[index].InstanceId = InstanceId;
         return this._ports[index].Port;
     }
-    private launchNewApiServerInstance(InstanceId: ServerId, Port: number) : Promise<any> {
+    private launchNewApiServerInstance(InstanceId: ServerId, Port: number) : Promise<number> {
         let apiAppScript = path.join(__dirname, "../api/app.js");
-        cp.spawn("node", [apiAppScript, Port.toString(), this.msgPort.toString(), InstanceId], {env: {"NODE_PATH": this.NODE_PATH}});
-        //cp.spawn("c:\\run\\cmd\\helper.bat", [apiAppScript, Port.toString(), this.msgPort.toString(), InstanceId], {env: {"NODE_PATH": this.NODE_PATH}});
-        return Promise.resolve<any>(null);
+        let childProcess = cp.spawn("node", [apiAppScript, Port.toString(), this.msgPort.toString(), InstanceId], {env: {"NODE_PATH": this.NODE_PATH}});
+        //let childProcess = cp.spawn("c:\\run\\cmd\\helper.bat", [apiAppScript, Port.toString(), this.msgPort.toString(), InstanceId], {env: {"NODE_PATH": this.NODE_PATH}});
+        return Promise.resolve<any>(childProcess.pid);
     }
     launchNewInstance() : Promise<sm.ServerInstance> {
         let InstanceId = uuid.v4();
         let Port = this.useAvailablePort(InstanceId);
         let InstanceUrl = "http://127.0.0.1:" + Port.toString();
-        let ServerInstnace: sm.ServerInstance = {Id: InstanceId, InstanceUrl};
         this.emit("instance-launching", InstanceId, InstanceUrl);
-        return this.launchNewApiServerInstance(InstanceId, Port).then(() => Promise.resolve<sm.ServerInstance>(ServerInstnace));  
+        return this.launchNewApiServerInstance(InstanceId, Port).then((pid: number) => {
+            let ServerInstnace: sm.ServerInstance = {Id: InstanceId, InstanceUrl, pid};
+            return Promise.resolve<sm.ServerInstance>(ServerInstnace)
+        });  
     }
     terminateInstance(InstanceId: string) : void {this.serverMessenger.requestToTerminate(InstanceId);}
 }

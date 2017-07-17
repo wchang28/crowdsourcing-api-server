@@ -8,6 +8,7 @@ export type ServerState = "initializing" | "ready" | "terminating";
 export interface ServerInstance {
     Id: ServerId;
     InstanceUrl: string;
+    pid: number;
 }
 
 export interface Server extends ServerInstance {
@@ -127,7 +128,7 @@ class StateMachine extends events.EventEmitter implements IStateMachine {
             return Promise.reject({error: "invalid-request", error_description: "not ready"});
         else {
             return this.serverManager.launchNewInstance().then((Instance: ServerInstance) => {
-                this._newServer = {Id: Instance.Id, InstanceUrl: Instance.InstanceUrl, State: "initializing", RequestCounter: 0};
+                this._newServer = {Id: Instance.Id, InstanceUrl: Instance.InstanceUrl, pid: Instance.pid, State: "initializing", RequestCounter: 0};
                 // "initializing" or "switching"
                 this.emit("state-change", this.State);
                 this.emit("change");
