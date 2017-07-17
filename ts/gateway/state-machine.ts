@@ -81,9 +81,8 @@ class StateMachine extends events.EventEmitter implements IStateMachine {
                     this._newServer = null;
                     this.emit("state-change", this.State);
                     this.serverManager.terminateInstance(this._oldServer.Id);   // try to terminate the old instance
-                    if (this._oldServer.RequestCounter === 0) {
-                        console.log("terminating condition met with server " + this._oldServer.Id + ", cond=#1");
-                    }
+                    if (this._oldServer.RequestCounter === 0)
+                        this.onKillOldServerConditionMet();
                 }
                 if (typeof this._newServerLaunchCompletionCallback === "function") {
                     this._newServerLaunchCompletionCallback(null);
@@ -91,7 +90,7 @@ class StateMachine extends events.EventEmitter implements IStateMachine {
                 }
                 this.emit("change");
             }
-        }).on("instance-terminated", (InstanceId: ServerId) => {
+        }).on("instance-terminated", (InstanceId: ServerId) => {    // old server got terminated
             if (this.State === "switched") {
                 this._oldServer = null;
                 // back to "ready"
@@ -105,6 +104,9 @@ class StateMachine extends events.EventEmitter implements IStateMachine {
             return Promise.reject({error: "invalid-request", error_description: "already initialized"});
         else
             return this.launchNewServer();
+    }
+    private onKillOldServerConditionMet() {
+        console.log("kill condition met with the old server " + this._oldServer.Id);
     }
     get State() : State {
         if (this._currentServer === null && this._newServer === null && this._oldServer === null)
@@ -179,7 +181,7 @@ class StateMachine extends events.EventEmitter implements IStateMachine {
         let server = this.getServerByInstanceId(InstanceId);
         if (server) {
             server.RequestCounter++;
-            console.log("counter inc. server=\n" + JSON.stringify(server, null, 2));
+            //console.log("counter inc. server=\n" + JSON.stringify(server, null, 2));
             this.emit("change");
         }
     }
@@ -188,11 +190,10 @@ class StateMachine extends events.EventEmitter implements IStateMachine {
         if (server) {
             if (server.RequestCounter > 0) {
                 server.RequestCounter--;
-                console.log("counter decrem. server=\n" + JSON.stringify(server, null, 2));
+                //console.log("counter decrem. server=\n" + JSON.stringify(server, null, 2));
                 this.emit("change");
-                if (server.State === "terminating" && server.RequestCounter === 0) {
-                    console.log("terminating condition met with server " + server.Id + ", cond=#2");
-                }
+                if (server.State === "terminating" && server.RequestCounter === 0)
+                    this.onKillOldServerConditionMet();
             } else {
                 console.log("!!! BAAAAD counter !!!");
             }
