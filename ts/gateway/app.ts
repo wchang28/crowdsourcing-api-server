@@ -71,11 +71,8 @@ stateMachine.on("ready", () => {    // api server is ready => get the proxy read
         let InstanceId = stateMachine.CurrentServer.Id;
         stateMachine.incrementRequestCounterByInstanceId(InstanceId);
         res.on("finish", () => {
-            console.log("res.finish()");
             stateMachine.decrementRequestCounterByInstanceId(InstanceId);
-        });
-        res.on("close", () => {
-            console.log("res.close()");
+        }).on("close", () => {
             stateMachine.decrementRequestCounterByInstanceId(InstanceId);
         });
         next();
