@@ -1,6 +1,6 @@
 import * as events from "events";
 import * as sm from "./state-machine";
-import * as uuid from "uuid";
+import {generate} from "shortid";
 import * as cp from "child_process"; 
 import * as path from 'path';
 import {ServerId} from "./types";
@@ -44,7 +44,7 @@ class ServerManager extends events.EventEmitter implements IServerManager {
         return Promise.resolve<any>(childProcess.pid);
     }
     launchNewInstance() : Promise<sm.ServerInstance> {
-        let InstanceId = uuid.v4();
+        let InstanceId = generate();
         let Port = this.useAvailablePort(InstanceId);
         let InstanceUrl = "http://127.0.0.1:" + Port.toString();
         this.emit("instance-launching", InstanceId, InstanceUrl);
