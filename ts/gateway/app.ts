@@ -14,7 +14,6 @@ import * as messenger from "./api-server-messenger";
 import {IGlobal} from "./global";
 import {Router as servicesRouter} from "./services";
 import * as proxy from "express-http-proxy";
-import * as msgtxp from "msg-transaction-processor";
 import {ServerId, ApiServerReadyResult} from "../message";
 
 let configFile: string = null;
