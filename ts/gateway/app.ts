@@ -33,11 +33,11 @@ monitor.on("pooling", (InstanceId: ServerId, InstanceUrl: string) => {
 });
 
 serverManager.on("instance-launching", (InstanceId: ServerId, InstanceUrl: string) => {
-    console.log(new Date().toISOString() + ": <<LAUNCHING>> new server instance " + InstanceId + " on " + InstanceUrl + "...");
+    console.log(new Date().toISOString() + ": <<LAUNCHING>> launching new server instance " + InstanceId + " on " + InstanceUrl + "...");
 }).on("instance-launched", (InstanceId: ServerId) => {
     console.log(new Date().toISOString() + ": <<LAUNCHED>> new server instance " + InstanceId + " is now READY :-)");
 }).on("instance-terminating", (InstanceId: ServerId, pid: number) => {
-    console.log(new Date().toISOString() + ": <<TERMINATING>> old server instance " + InstanceId + " with pid=" + pid.toString() + "...");
+    console.log(new Date().toISOString() + ": <<TERMINATING>> killing old server instance " + InstanceId + " with pid=" + pid.toString() + "...");
 }).on("instance-terminated", (InstanceId: ServerId) => {
     console.log(new Date().toISOString() + ": <<TERMINATED>> old server instance " + InstanceId + " is terminated :-)");
 });
