@@ -31,7 +31,7 @@ let stateMachine = sm.get(serverManager);
 monitor.on("pooling", (InstanceId: ServerId, InstanceUrl: string) => {
     console.log(new Date().toISOString() + ": <<POOLING>> new server instance " + InstanceId + " for readyness on " + InstanceUrl + "...");
 }).on("instance-not-ready", (InstanceId: ServerId) => {
-    console.log(new Date().toISOString() + ": <<NOT-READY>> new server instance " + InstanceId + " is strill not ready");
+    console.log(new Date().toISOString() + ": <<NOT-READY>> new server instance " + InstanceId + " is still not ready");
 });
 
 serverManager.on("instance-launching", (InstanceId: ServerId, InstanceUrl: string) => {
