@@ -29,17 +29,17 @@ let serverManager = srvMgr.get(config.availableApiServerPorts, config.NODE_PATH,
 let stateMachine = sm.get(serverManager);
 
 monitor.on("pooling", (InstanceId: ServerId, InstanceUrl: string) => {
-    console.log(new Date().toISOString() + ": <<POOLING>> new server instance " + InstanceId + " for readyness on " + InstanceUrl);
+    console.log(new Date().toISOString() + ": <<POOLING>> new server instance " + InstanceId + " for readyness on " + InstanceUrl + "...");
 });
 
 serverManager.on("instance-launching", (InstanceId: ServerId, InstanceUrl: string) => {
-    console.log(new Date().toISOString() + ": <<LAUNCHING>> new server instance " + InstanceId + " on " + InstanceUrl);
+    console.log(new Date().toISOString() + ": <<LAUNCHING>> new server instance " + InstanceId + " on " + InstanceUrl + "...");
 }).on("instance-launched", (InstanceId: ServerId) => {
     console.log(new Date().toISOString() + ": <<LAUNCHED>> new server instance " + InstanceId + " is launched and READY");
 }).on("instance-terminating", (InstanceId: ServerId, pid: number) => {
-    console.log(new Date().toISOString() + ": <<TERMINATING>> server instance " + InstanceId + " with pid=" + pid.toString());
+    console.log(new Date().toISOString() + ": <<TERMINATING>> old server instance " + InstanceId + " with pid=" + pid.toString() + "...");
 }).on("instance-terminated", (InstanceId: ServerId) => {
-    console.log(new Date().toISOString() + ": <<TERMINATED>> server instance " + InstanceId + " is terminated");
+    console.log(new Date().toISOString() + ": <<TERMINATED>> old server instance " + InstanceId + " is terminated");
 });
 
 stateMachine.on("ready", () => {    // api server is ready => get the proxy ready
