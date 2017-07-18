@@ -60,9 +60,9 @@ stateMachine.on("ready", () => {    // api server is ready => get the proxy read
 
     startServer(config.proxyServerConfig, appProxy, (secure:boolean, host:string, port:number) => {
         let protocol = (secure ? 'https' : 'http');
-        console.log(new Date().toISOString() + ': api gateway <PROXY> server listening at %s://%s:%s', protocol, host, port);
+        console.log(new Date().toISOString() + ': gateway <PROXY> server listening at %s://%s:%s', protocol, host, port);
     }, (err:any) => {
-        console.error(new Date().toISOString() + ': !!! api gateway <PROXY> server error: ' + JSON.stringify(err));
+        console.error(new Date().toISOString() + ': !!! gateway <PROXY> server error: ' + JSON.stringify(err));
         process.exit(1);
     });
 }).on("state-change", (state: sm.State) => {
@@ -87,9 +87,9 @@ appAdmin.use("/services", servicesRouter);
 
 startServer(config.adminServerConfig, appAdmin, (secure:boolean, host:string, port:number) => {
     let protocol = (secure ? 'https' : 'http');
-    console.log(new Date().toISOString() + ': api gateway <ADMIN> server listening at %s://%s:%s', protocol, host, port);
+    console.log(new Date().toISOString() + ': gateway <ADMIN> server listening at %s://%s:%s', protocol, host, port);
     stateMachine.initialize();
 }, (err:any) => {
-    console.error(new Date().toISOString() + ': !!! api gateway <ADMIN> server error: ' + JSON.stringify(err));
+    console.error(new Date().toISOString() + ': !!! gateway <ADMIN> server error: ' + JSON.stringify(err));
     process.exit(1);
 });
