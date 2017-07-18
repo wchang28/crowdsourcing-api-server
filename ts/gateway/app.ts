@@ -29,7 +29,7 @@ let serverManager = srvMgr.get(config.availableApiServerPorts, config.NODE_PATH,
 let stateMachine = sm.get(serverManager);
 
 monitor.on("pooling", (InstanceId: ServerId, InstanceUrl: string) => {
-    console.log(new Date().toISOString() + ": <<POOLING>> new server instance " + InstanceId + " readyness on " + InstanceUrl);
+    console.log(new Date().toISOString() + ": <<POOLING>> new server instance " + InstanceId + " for readyness on " + InstanceUrl);
 });
 
 serverManager.on("instance-launching", (InstanceId: ServerId, InstanceUrl: string) => {
