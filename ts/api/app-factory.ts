@@ -4,7 +4,7 @@ import * as express from 'express';
 import * as bodyParser from "body-parser";
 import noCache = require('no-cache-express');
 import * as prettyPrinter from 'express-pretty-print';
-import {getAllExtensionModules} from "../extensions";
+import {getAllExtensionModules} from "./extensions";
 import {ExtensionModuleExport, AppGlobal} from "crowdsourcing-api";
 import * as rcf from "rcf";
 import * as node$ from "rest-node";
