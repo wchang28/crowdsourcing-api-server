@@ -106,7 +106,6 @@ class StateMachine extends events.EventEmitter implements IStateMachine {
             return this.launchNewServer();
     }
     private onKillOldServerConditionMet() {
-        console.log("kill condition met with the old server " + this._oldServer.Id);
         this.serverManager.terminateInstance(this._oldServer.Id, this._oldServer.pid);   // try to terminate the old instance
     }
     get State() : State {

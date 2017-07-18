@@ -16,6 +16,7 @@ export interface IServerManager {
     terminateInstance(InstanceId: ServerId, pid: number) : void;
     on(event: "instance-launching", listener: (InstanceId: ServerId, InstanceUrl: string) => void) : this;
     on(event: "instance-launched", listener: (InstanceId: ServerId) => void) : this;
+    on(event: "instance-terminating", listener: (InstanceId: ServerId, pid: number) => void): this;
     on(event: "instance-terminated", listener: (InstanceId: ServerId) => void): this;
 }
 
@@ -55,6 +56,7 @@ class ServerManager extends events.EventEmitter implements IServerManager {
         });  
     }
     terminateInstance(InstanceId: string, pid: number) : void {
+        this.emit("instance-terminating", InstanceId, pid)
         kill(pid, 'SIGKILL', (err: any) => {
             for (let i in this._ports) {
                 if (this._ports[i].InstanceId === InstanceId) {

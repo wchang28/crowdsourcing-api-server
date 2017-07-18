@@ -35,9 +35,11 @@ monitor.on("pooling", (InstanceId: ServerId, InstanceUrl: string) => {
 serverManager.on("instance-launching", (InstanceId: ServerId, InstanceUrl: string) => {
     console.log(new Date().toISOString() + ": <<LAUNCHING>> new server instance " + InstanceId + " on " + InstanceUrl);
 }).on("instance-launched", (InstanceId: ServerId) => {
-    console.log(new Date().toISOString() + ": <<LAUNCHED>> new server instance " + InstanceId + " launched");
+    console.log(new Date().toISOString() + ": <<LAUNCHED>> new server instance " + InstanceId + " is launched");
+}).on("instance-terminating", (InstanceId: ServerId, pid: number) => {
+    console.log(new Date().toISOString() + ": <<TERMINATING>> server instance " + InstanceId + " with pid=" + pid.toString());
 }).on("instance-terminated", (InstanceId: ServerId) => {
-    console.log(new Date().toISOString() + ": <<TERMINATED>> server instance " + InstanceId + " terminated");
+    console.log(new Date().toISOString() + ": <<TERMINATED>> server instance " + InstanceId + " is terminated");
 });
 
 stateMachine.on("ready", () => {    // api server is ready => get the proxy ready
