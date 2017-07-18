@@ -2,8 +2,6 @@ import * as express from 'express';
 import * as events from "events";
 import * as tr from 'rcf-message-router';
 import {Message, ServerId, ApiServerReadyResult} from "../message";
-import * as svrmgr from "./server-mgr";
-import * as msgtxp from "msg-transaction-processor";
 import {MsgTopic} from "../utils";
 
 export interface IApiServerMessenger {
