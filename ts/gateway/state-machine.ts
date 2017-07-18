@@ -18,7 +18,7 @@ export interface Server extends ServerInstance {
 
 export interface IServerManager {
     launchNewInstance() : Promise<ServerInstance>;
-    terminateInstance(InstanceId: ServerId) : void;
+    terminateInstance(InstanceId: ServerId, pid: number) : void;
     on(event: "instance-launched", listener: (InstanceId: ServerId) => void) : this;
     on(event: "instance-terminated", listener: (InstanceId: ServerId) => void): this;
 }
@@ -81,7 +81,6 @@ class StateMachine extends events.EventEmitter implements IStateMachine {
                     this._currentServer = this._newServer;
                     this._newServer = null;
                     this.emit("state-change", this.State);
-                    this.serverManager.terminateInstance(this._oldServer.Id);   // try to terminate the old instance
                     if (this._oldServer.RequestCounter === 0)
                         this.onKillOldServerConditionMet();
                 }
@@ -108,6 +107,7 @@ class StateMachine extends events.EventEmitter implements IStateMachine {
     }
     private onKillOldServerConditionMet() {
         console.log("kill condition met with the old server " + this._oldServer.Id);
+        this.serverManager.terminateInstance(this._oldServer.Id, this._oldServer.pid);   // try to terminate the old instance
     }
     get State() : State {
         if (this._currentServer === null && this._newServer === null && this._oldServer === null)
@@ -128,6 +128,7 @@ class StateMachine extends events.EventEmitter implements IStateMachine {
             return Promise.reject({error: "invalid-request", error_description: "not ready"});
         else {
             return this.serverManager.launchNewInstance().then((Instance: ServerInstance) => {
+                //console.log(JSON.stringify(Instance, null, 2));
                 this._newServer = {Id: Instance.Id, InstanceUrl: Instance.InstanceUrl, pid: Instance.pid, State: "initializing", RequestCounter: 0};
                 // "initializing" or "switching"
                 this.emit("state-change", this.State);

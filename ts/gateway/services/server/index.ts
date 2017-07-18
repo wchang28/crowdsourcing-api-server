@@ -3,8 +3,6 @@ import * as core from 'express-serve-static-core';
 import {RequestData} from "../../request-data";
 import * as msg from "../../../message";
 import {Server} from "../../state-machine";
-import {IApiServerMessenger} from "../../api-server-messenger"
-import * as msgtxp from "msg-transaction-processor";
 
 let router = express.Router();
 export {router as Router};
@@ -27,15 +25,4 @@ router.use("/curr", getSetApiServerMiddleware((rqd: RequestData) => rqd.StateMac
 router.use("/new", getSetApiServerMiddleware((rqd: RequestData) => rqd.StateMachine.NewServer), serverRouter);
 router.use("/old", getSetApiServerMiddleware((rqd: RequestData) => rqd.StateMachine.OldServer), serverRouter);
 
-class QueryApiServerStateTx implements msgtxp.ITransaction {
-    constructor(public APIServer: Server, private apiServerMessenger: IApiServerMessenger) {}
-    sendRequest(TransactionId: msgtxp.TransactionId) : Promise<any> {
-        this.apiServerMessenger.queryState(this.APIServer.Id, TransactionId);
-        return Promise.resolve<any>(null);
-    }
-    toJSON(): Server {return this.APIServer;}
-}
-
-serverRouter.get("/state", RequestData.Endware<msg.ApiServerState>((rqd: RequestData) => {
-    return rqd.APIServerMsgTransactionProcessor.execute<msg.ApiServerState>(new QueryApiServerStateTx(rqd.APIServer, rqd.APIServerMessenger));
-}));
+serverRouter.get("/", RequestData.Endware<Server>((rqd: RequestData) => Promise.resolve<Server>(rqd.APIServer)));

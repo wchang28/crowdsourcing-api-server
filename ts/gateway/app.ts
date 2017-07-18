@@ -15,7 +15,7 @@ import {IGlobal} from "./global";
 import {Router as servicesRouter} from "./services";
 import * as proxy from "express-http-proxy";
 import * as msgtxp from "msg-transaction-processor";
-import {ServerId, ApiServerReadyResult, TerminateAckResult} from "../message";
+import {ServerId, ApiServerReadyResult} from "../message";
 
 let configFile: string = null;
 
@@ -43,7 +43,6 @@ startServer(config.msgServerConfig, appMsg, (secure:boolean, host:string, port:n
 });
 
 let apiServerMessenger = messenger.get(connectionsManager);
-let apiServerMsgTransactionProcessor = msgtxp.get(apiServerMessenger, {timeoutMS: 15000});
 let serverManager = srvMgr.get(config.availableApiServerPorts, config.msgServerConfig.http.port, config.NODE_PATH, apiServerMessenger);
 let stateMachine = sm.get(serverManager);
 
@@ -52,12 +51,6 @@ apiServerMessenger.on("instance-launched", (InstanceId: ServerId, readyResult: A
         console.log(new Date().toISOString() + ": <<LAUNCHED>> new server instance " + InstanceId + " reported NODE_PATH=" + readyResult.NODE_PATH + ":-)");
     else
         console.error(new Date().toISOString() + "!!! Error: new server did not receive NODE_PATH env. variable");
-}).on("instance-terminate-req", (InstanceId: ServerId) => {
-    console.log(new Date().toISOString() + ": <<TERM-REQ>> request to terminate api server instance " + InstanceId);
-}).on("instance-terminate-ack", (InstanceId: ServerId, ackResult: TerminateAckResult) => {
-    console.log(new Date().toISOString() + ": <<TERM-ACK>> api server instance " + InstanceId + " <ACK> the termination request, ackResult=" + JSON.stringify(ackResult));
-}).on("instance-terminated", (InstanceId: ServerId) => {
-    console.log(new Date().toISOString() + ": <<TERMINATED>> on api server instance " + InstanceId + " has successfully terminated :-)");
 });
 
 serverManager.on("instance-launching", (InstanceId: ServerId, InstanceUrl: string) => {
@@ -104,7 +97,6 @@ let g: IGlobal = {
     ,stateMachine
     ,connectionsManager
     ,apiServerMessenger
-    ,apiServerMsgTransactionProcessor
 };
 
 appAdmin.set("global", g);

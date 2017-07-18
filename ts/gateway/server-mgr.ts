@@ -4,16 +4,15 @@ import * as uuid from "uuid";
 import * as cp from "child_process"; 
 import * as path from 'path';
 import {ServerId, ApiServerReadyResult} from "../message";
+import * as kill from "tree-kill";
 
 export interface IServerMessenger {
-    requestToTerminate(InstanceId: string): void;
     on(event: "instance-launched", listener: (InstanceId: ServerId, readyResult: ApiServerReadyResult) => void) : this;
-    on(event: "instance-terminated", listener: (InstanceId: ServerId) => void): this;
 }
 
 export interface IServerManager {
     launchNewInstance() : Promise<sm.ServerInstance>;
-    terminateInstance(InstanceId: ServerId) : void;
+    terminateInstance(InstanceId: ServerId, pid: number) : void;
     on(event: "instance-launching", listener: (InstanceId: ServerId, InstanceUrl: string) => void) : this;
     on(event: "instance-launched", listener: (InstanceId: ServerId) => void) : this;
     on(event: "instance-terminated", listener: (InstanceId: ServerId) => void): this;
@@ -31,15 +30,7 @@ class ServerManager extends events.EventEmitter implements IServerManager {
         this._ports = [{Port:availablePorts[0], InstanceId: null}, {Port:availablePorts[1], InstanceId: null}];
         this.serverMessenger.on("instance-launched", (InstanceId: ServerId, readyResult: ApiServerReadyResult) => {
             this.emit("instance-launched", InstanceId);
-        }).on("instance-terminated", (InstanceId: ServerId) => {
-            for (let i in this._ports) {
-                if (this._ports[i].InstanceId === InstanceId) {
-                    this._ports[i].InstanceId = null;
-                    break;
-                }
-            }
-            this.emit("instance-terminated", InstanceId);
-        })
+        });
     }
     private useAvailablePort(InstanceId: ServerId) : number {
         let index = (!this._ports[0].InstanceId ? 0 : 1);
@@ -62,7 +53,17 @@ class ServerManager extends events.EventEmitter implements IServerManager {
             return Promise.resolve<sm.ServerInstance>(ServerInstnace)
         });  
     }
-    terminateInstance(InstanceId: string) : void {this.serverMessenger.requestToTerminate(InstanceId);}
+    terminateInstance(InstanceId: string, pid: number) : void {
+        kill(pid, 'SIGKILL', (err: any) => {
+            for (let i in this._ports) {
+                if (this._ports[i].InstanceId === InstanceId) {
+                    this._ports[i].InstanceId = null;
+                    break;
+                }
+            }
+            this.emit("instance-terminated", InstanceId);
+        });
+    }
 }
 
 export function get(availablePorts: [number, number], msgPort: number, NODE_PATH: string, serverMessenger: IServerMessenger) : IServerManager {return new ServerManager(availablePorts, msgPort, NODE_PATH, serverMessenger);}

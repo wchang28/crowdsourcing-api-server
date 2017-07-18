@@ -4,7 +4,6 @@ import * as http from "http";
 import {IStateMachine, Server} from "./state-machine";
 import {IConnectionsManager} from 'rcf-message-router';
 import {IApiServerMessenger} from "./api-server-messenger";
-import {IMsgTransactionProcessor} from "msg-transaction-processor";
 
 interface RequestInfo {
     apiServer?: Server;
@@ -36,7 +35,6 @@ export class RequestData {
     get StateMachine() : IStateMachine {return this.Global.stateMachine;}
     get ConnectionsManager(): IConnectionsManager {return this.Global.connectionsManager;}
     get APIServerMessenger() : IApiServerMessenger {return this.Global.apiServerMessenger;}
-    get APIServerMsgTransactionProcessor() : IMsgTransactionProcessor {return this.Global.apiServerMsgTransactionProcessor;}
 
     get APIServer(): Server {return this.RequestInfo.apiServer;}
     set APIServer(value: Server) {this.RequestInfo.apiServer = value;}

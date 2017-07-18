@@ -4,7 +4,6 @@ import * as core from 'express-serve-static-core';
 import {RequestData} from "../request-data";
 import {StateMachineJSON, State} from "../state-machine";
 import {Router as serverRouter} from "./server";
-import {Router as apiRouter} from "./api";
 import {ITopicConnectionJSON} from 'rcf-message-router';
 
 let router = express.Router();
@@ -15,4 +14,3 @@ router.get("/state", RequestData.Endware<State>((rqd: RequestData) => Promise.re
 router.get("/deploy", RequestData.Endware<any>((rqd: RequestData) => rqd.StateMachine.deploy()));
 router.get("/connections", RequestData.Endware<ITopicConnectionJSON[]>((rqd: RequestData) => Promise.resolve<ITopicConnectionJSON[]>(rqd.ConnectionsManager.toJSON())));
 router.use("/server", serverRouter);
-router.use("/api", apiRouter);
