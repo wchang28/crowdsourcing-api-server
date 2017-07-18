@@ -7,7 +7,8 @@ import * as net from "net";
 export interface IServerMonitor {
     monitor(InstanceId: ServerId, InstanceUrl: string) : void;
     on(event: "pooling", listener: (InstanceId: ServerId, InstanceUrl: string) => void) : this;
-    on(event: "instance-launched", listener: (InstanceId: ServerId) => void) : this;
+    on(event: "instance-not-ready", listener: (InstanceId: ServerId) => void) : this;
+    on(event: "instance-ready", listener: (InstanceId: ServerId) => void) : this;
 }
 
 class ServerMonitor extends events.EventEmitter implements IServerMonitor {
@@ -50,12 +51,10 @@ class ServerMonitor extends events.EventEmitter implements IServerMonitor {
             this.pollingServerReadyness()
             .then((ready: boolean) => {
                 if (!ready) {
-                    //console.log(new Date().toISOString() + ": new server not ready...");
+                    this.emit('instance-not-ready', this._InstanceId);
                     this._timer = setTimeout(this.TimerFunction, 1000);
-                } else {
-                    //console.log(new Date().toISOString() + ": new server is READY :-)");
-                    this.emit('instance-launched', this._InstanceId);
-                }
+                } else
+                    this.emit('instance-ready', this._InstanceId);
             }).catch((err: any) => {
                 this._timer = setTimeout(this.TimerFunction, 1000);
             });

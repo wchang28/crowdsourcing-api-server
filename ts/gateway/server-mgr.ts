@@ -8,7 +8,7 @@ import * as kill from "tree-kill";
 
 export interface IServerMonitor {
     monitor(InstanceId: ServerId, InstanceUrl: string) : void;
-    on(event: "instance-launched", listener: (InstanceId: ServerId) => void) : this;
+    on(event: "instance-ready", listener: (InstanceId: ServerId) => void) : this;
 }
 
 export interface IServerManager {
@@ -30,7 +30,7 @@ class ServerManager extends events.EventEmitter implements IServerManager {
     constructor(availablePorts: [number, number], private NODE_PATH: string, private serverMonitor: IServerMonitor) {
         super();
         this._ports = [{Port:availablePorts[0], InstanceId: null}, {Port:availablePorts[1], InstanceId: null}];
-        this.serverMonitor.on("instance-launched", (InstanceId: ServerId) => {
+        this.serverMonitor.on("instance-ready", (InstanceId: ServerId) => {
             this.emit("instance-launched", InstanceId);
         });
     }
