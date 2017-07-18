@@ -3,11 +3,12 @@ import * as sm from "./state-machine";
 import * as uuid from "uuid";
 import * as cp from "child_process"; 
 import * as path from 'path';
-import {ServerId, ApiServerReadyResult} from "../message";
+import {ServerId} from "../message";
 import * as kill from "tree-kill";
 
-export interface IServerMessenger {
-    on(event: "instance-launched", listener: (InstanceId: ServerId, readyResult: ApiServerReadyResult) => void) : this;
+export interface IServerMonitor {
+    monitor(InstanceId: ServerId, InstanceUrl: string) : void;
+    on(event: "instance-launched", listener: (InstanceId: ServerId) => void) : this;
 }
 
 export interface IServerManager {
@@ -25,10 +26,10 @@ interface PortItem {
 
 class ServerManager extends events.EventEmitter implements IServerManager {
     private _ports: [PortItem, PortItem];
-    constructor(availablePorts: [number, number], private msgPort: number, private NODE_PATH: string, private serverMessenger: IServerMessenger) {
+    constructor(availablePorts: [number, number], private msgPort: number, private NODE_PATH: string, private serverMonitor: IServerMonitor) {
         super();
         this._ports = [{Port:availablePorts[0], InstanceId: null}, {Port:availablePorts[1], InstanceId: null}];
-        this.serverMessenger.on("instance-launched", (InstanceId: ServerId, readyResult: ApiServerReadyResult) => {
+        this.serverMonitor.on("instance-launched", (InstanceId: ServerId) => {
             this.emit("instance-launched", InstanceId);
         });
     }
@@ -48,6 +49,7 @@ class ServerManager extends events.EventEmitter implements IServerManager {
         let Port = this.useAvailablePort(InstanceId);
         let InstanceUrl = "http://127.0.0.1:" + Port.toString();
         this.emit("instance-launching", InstanceId, InstanceUrl);
+        this.serverMonitor.monitor(InstanceId, InstanceUrl);
         return this.launchNewApiServerInstance(InstanceId, Port).then((pid: number) => {
             let ServerInstnace: sm.ServerInstance = {Id: InstanceId, InstanceUrl, pid};
             return Promise.resolve<sm.ServerInstance>(ServerInstnace)
@@ -66,4 +68,4 @@ class ServerManager extends events.EventEmitter implements IServerManager {
     }
 }
 
-export function get(availablePorts: [number, number], msgPort: number, NODE_PATH: string, serverMessenger: IServerMessenger) : IServerManager {return new ServerManager(availablePorts, msgPort, NODE_PATH, serverMessenger);}
+export function get(availablePorts: [number, number], msgPort: number, NODE_PATH: string, serverMonitor: IServerMonitor) : IServerManager {return new ServerManager(availablePorts, msgPort, NODE_PATH, serverMonitor);}

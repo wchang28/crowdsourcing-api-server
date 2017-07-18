@@ -10,7 +10,7 @@ import * as events from "events";
 import * as srvMgr from "./server-mgr";
 import * as sm from "./state-machine";
 import {Router as msgRouter, ConnectionsManager as connectionsManager} from "./msg";
-import * as messenger from "./api-server-messenger";
+import {get as getServerMonitor} from "./server-monitor";
 import {IGlobal} from "./global";
 import {Router as servicesRouter} from "./services";
 import * as proxy from "express-http-proxy";
@@ -41,19 +41,20 @@ startServer(config.msgServerConfig, appMsg, (secure:boolean, host:string, port:n
     process.exit(1);
 });
 
-let apiServerMessenger = messenger.get(connectionsManager);
-let serverManager = srvMgr.get(config.availableApiServerPorts, config.msgServerConfig.http.port, config.NODE_PATH, apiServerMessenger);
+let monitor = getServerMonitor();
+let serverManager = srvMgr.get(config.availableApiServerPorts, config.msgServerConfig.http.port, config.NODE_PATH, monitor);
 let stateMachine = sm.get(serverManager);
 
-apiServerMessenger.on("instance-launched", (InstanceId: ServerId, readyResult: ApiServerReadyResult) => {
-    if (readyResult.NODE_PATH)
-        console.log(new Date().toISOString() + ": <<LAUNCHED>> new server instance " + InstanceId + " reported NODE_PATH=" + readyResult.NODE_PATH + ":-)");
-    else
-        console.error(new Date().toISOString() + "!!! Error: new server did not receive NODE_PATH env. variable");
+monitor.on("pooling", (InstanceId: ServerId, InstanceUrl: string) => {
+    console.log(new Date().toISOString() + ": <<POOLING>> new server instance " + InstanceId + " readyness on " + InstanceUrl);
 });
 
 serverManager.on("instance-launching", (InstanceId: ServerId, InstanceUrl: string) => {
     console.log(new Date().toISOString() + ": <<LAUNCHING>> new server instance " + InstanceId + " on " + InstanceUrl);
+}).on("instance-launched", (InstanceId: ServerId) => {
+    console.log(new Date().toISOString() + ": <<LAUNCHED>> new server instance " + InstanceId + " launched");
+}).on("instance-terminated", (InstanceId: ServerId) => {
+    console.log(new Date().toISOString() + ": <<TERMINATED>> server instance " + InstanceId + " terminated");
 });
 
 stateMachine.on("ready", () => {    // api server is ready => get the proxy ready
