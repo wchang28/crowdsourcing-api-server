@@ -43,7 +43,7 @@ serverManager.on("instance-launching", (InstanceId: ServerId, InstanceUrl: strin
 });
 
 stateMachine.on("ready", () => {    // api server is ready => get the proxy ready
-    console.log(new Date().toISOString() + ': state machine reports a <ready> state. starting the api proxy server...');
+    console.log(new Date().toISOString() + ': state machine reports a <ready> state. starting the proxy server...');
     let appProxy = express();
     let requestCounterTrackingMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction) => {
         let InstanceId = stateMachine.CurrentServer.Id;
