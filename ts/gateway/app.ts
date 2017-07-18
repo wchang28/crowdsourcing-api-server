@@ -9,12 +9,11 @@ import {IAppConfig} from './app-config';
 import * as events from "events";
 import * as srvMgr from "./server-mgr";
 import * as sm from "./state-machine";
-import {Router as msgRouter, ConnectionsManager as connectionsManager} from "./msg";
 import {get as getServerMonitor} from "./server-monitor";
 import {IGlobal} from "./global";
 import {Router as servicesRouter} from "./services";
 import * as proxy from "express-http-proxy";
-import {ServerId, ApiServerReadyResult} from "../message";
+import {ServerId} from "./types";
 
 let configFile: string = null;
 
@@ -25,24 +24,8 @@ else
 
 let config: IAppConfig = JSON.parse(fs.readFileSync(configFile, 'utf8'));
 
-let appMsg = express();
-appMsg.set('jsonp callback name', 'cb');
-appMsg.use(noCache);
-appMsg.use(bodyParser.json({"limit":"999mb"}));
-appMsg.use(prettyPrinter.get());
-
-appMsg.use('/msg', msgRouter);
-
-startServer(config.msgServerConfig, appMsg, (secure:boolean, host:string, port:number) => {
-    let protocol = (secure ? 'https' : 'http');
-    console.log(new Date().toISOString() + ': api gateway <MSG> server listening at %s://%s:%s', protocol, host, port);
-}, (err:any) => {
-    console.error(new Date().toISOString() + ': !!! api gateway <MSG> server error: ' + JSON.stringify(err));
-    process.exit(1);
-});
-
 let monitor = getServerMonitor();
-let serverManager = srvMgr.get(config.availableApiServerPorts, config.msgServerConfig.http.port, config.NODE_PATH, monitor);
+let serverManager = srvMgr.get(config.availableApiServerPorts, config.NODE_PATH, monitor);
 let stateMachine = sm.get(serverManager);
 
 monitor.on("pooling", (InstanceId: ServerId, InstanceUrl: string) => {

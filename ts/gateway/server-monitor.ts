@@ -1,5 +1,5 @@
 import * as events from "events";
-import {ServerId} from "../message";
+import {ServerId} from "./types";
 import * as http from "http";
 import * as url from "url";
 import * as net from "net";
@@ -43,25 +43,25 @@ class ServerMonitor extends events.EventEmitter implements IServerMonitor {
             });
             req.end();
         });
-      }
-
+    }
     private get TimerFunction() : () => void {
         let func = () => {
             this._timer = null;
             this.pollingServerReadyness()
             .then((ready: boolean) => {
                 if (!ready) {
-                    console.log("new server not ready");
+                    //console.log(new Date().toISOString() + ": new server not ready...");
                     this._timer = setTimeout(this.TimerFunction, 1000);
-                } else
+                } else {
+                    //console.log(new Date().toISOString() + ": new server is READY :-)");
                     this.emit('instance-launched', this._InstanceId);
+                }
             }).catch((err: any) => {
                 this._timer = setTimeout(this.TimerFunction, 1000);
             });
         };
         return func.bind(this);
     }
-
     monitor(InstanceId: ServerId, InstanceUrl: string) : void {
         if (this._timer) {
             clearTimeout(this._timer);

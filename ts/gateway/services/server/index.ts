@@ -1,7 +1,6 @@
 import * as express from 'express';
 import * as core from 'express-serve-static-core';
 import {RequestData} from "../../request-data";
-import * as msg from "../../../message";
 import {Server} from "../../state-machine";
 
 let router = express.Router();
