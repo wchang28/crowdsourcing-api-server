@@ -14,8 +14,6 @@
     "@types/express": "^4.0.36",
     "@types/lodash": "^4.14.68",
     "@types/node": "^8.0.8",
-    "@types/shortid": "0.0.29",
-    "@types/tree-kill": "git+https://github.com/wchang28/tree-kill-types.git",
     "body-parser": "^1.17.2",
     "crowdsourcing-api": "https://github.com/wchang28/crowdsourcing-api.git",
     "express": "^4.15.3",
@@ -25,8 +23,6 @@
     "lodash": "^4.17.4",
     "no-cache-express": "https://github.com/wchang28/no-cache-express.git",
     "rcf": "https://github.com/wchang28/rcf.git",
-    "rest-node": "https://github.com/wchang28/rest-node.git",
-    "shortid": "^2.2.8",
-    "tree-kill": "^1.1.0"
+    "rest-node": "https://github.com/wchang28/rest-node.git"
   }
 }
