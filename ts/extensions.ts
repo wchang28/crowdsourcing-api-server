@@ -2,7 +2,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 export interface ExtensionModule {
-    module: string;
+	module: string;
+	filePath: string;
     package_json: any;
     README_md?: string;
 }
@@ -26,7 +27,7 @@ export function getAllExtensionModules(NODE_PATH: string) : ExtensionModule[] {
 					fs.accessSync(readmeFilePath);
 					README_md = fs.readFileSync(readmeFilePath, 'utf8');
 				} catch(e) {}
-				ret.push({module, package_json, README_md});
+				ret.push({module, filePath, package_json, README_md});
 			} catch (e) {}
 		}
 	}
