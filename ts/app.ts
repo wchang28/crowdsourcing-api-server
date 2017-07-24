@@ -55,7 +55,7 @@ let serviceRouter = express.Router();
 function getSetExtensionMiddleware(extension: ExtensionModule) {
     return (req: express.Request, res: express.Response, next: express.NextFunction) => {
         let rqd = getRequestData(req);
-        rqd.set("__Extension__", extension);
+        rqd.set("__ThisExtension__", extension);
         next();
     };
 }
