@@ -1,12 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-
-export interface ExtensionModule {
-	module: string;
-	homePath: string;
-    package_json: any;
-    README_md?: string;
-}
+import {ExtensionModule} from "crowdsourcing-api";
 
 export function getAllExtensionModules(NODE_PATH: string) : ExtensionModule[] {
     let ret: ExtensionModule[] = [];
