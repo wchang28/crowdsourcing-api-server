@@ -3,8 +3,8 @@ import {IWebServerConfig, startServer} from 'express-web-server';
 import * as bodyParser from "body-parser";
 import noCache = require('no-cache-express');
 import * as prettyPrinter from 'express-pretty-print';
-import {getAllExtensionModules} from "./extensions";
-import {ExtensionModuleExport, AppGlobal} from "crowdsourcing-api";
+import {getAllExtensionModules, ExtensionModule} from "./extensions";
+import {ExtensionModuleExport, AppGlobal, getRequestData} from "crowdsourcing-api";
 import * as rcf from "rcf";
 import * as node$ from "rest-node";
 import {get as getCGILauncher} from "./cgi-child-process";
@@ -52,13 +52,23 @@ app.set("global", g);   // set the global object
 
 let serviceRouter = express.Router();
 
+function getSetExtensionMiddleware(extension: ExtensionModule) {
+    return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        let rqd = getRequestData(req);
+        rqd.set("__Extension__", extension);
+        next();
+    };
+}
+
 let extensionModules = getAllExtensionModules(NODE_PATH);
 for (let i in extensionModules) {   // for each module
-    let module = extensionModules[i].module;
+    let extension = extensionModules[i];
+    let module = extension.module;
+    let filePath = extension.filePath;
     try {
         let moduleExport: ExtensionModuleExport = require(module);
         let moduleRouter = express.Router();
-        serviceRouter.use("/" + module, moduleRouter);
+        serviceRouter.use("/" + module, getSetExtensionMiddleware(extension), moduleRouter);
         moduleExport.init(moduleRouter);
     } catch(e) {
 
