@@ -80,3 +80,17 @@ startServer({http:{port: Port, host: "127.0.0.1"}}, app, (secure:boolean, host:s
     console.error(new Date().toISOString() + ': !!! crowdsourcing api server error: ' + JSON.stringify(err));
     process.exit(1);
 });
+
+
+
+
+
+import {Readable} from "stream";
+import * as process from "process";
+
+getCGILauncher().exec("curl https://www.yahoo.com")
+.then((stdout: Readable) => {
+    stdout.pipe(process.stdout);
+}).catch((err: any) => {
+    console.log("!!! error :"  + JSON.stringify(err));
+})
