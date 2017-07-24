@@ -7,6 +7,7 @@ import {getAllExtensionModules} from "./extensions";
 import {ExtensionModuleExport, AppGlobal} from "crowdsourcing-api";
 import * as rcf from "rcf";
 import * as node$ from "rest-node";
+import {get as getCGILauncher} from "./cgi-child-process";
 
 let NODE_PATH = process.env["NODE_PATH"];
 let Port = (process.env["PORT"] ? parseInt(process.env["PORT"]) : 80);
@@ -44,6 +45,7 @@ let selfApi = new rcf.AuthorizedRestApi(node$.get(), {instance_url: "http://127.
 let selfApiRoute = selfApi.mount("/");
 let g: AppGlobal = {
     selfApiRoute
+    ,cgiChildProcessLauncher: getCGILauncher()
 };
 
 app.set("global", g);   // set the global object
