@@ -64,7 +64,6 @@ let extensionModules = getAllExtensionModules(NODE_PATH);
 for (let i in extensionModules) {   // for each module
     let extension = extensionModules[i];
     let module = extension.module;
-    let filePath = extension.filePath;
     try {
         let moduleExport: ExtensionModuleExport = require(module);
         let moduleRouter = express.Router();
