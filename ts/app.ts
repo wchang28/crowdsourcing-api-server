@@ -86,9 +86,12 @@ startServer({http:{port: Port, host: "127.0.0.1"}}, app, (secure:boolean, host:s
 
 
 import {Readable} from "stream";
-import * as process from "process";
 
-getCGILauncher().exec("curl https://www.yahoo.com")
+//let command = "curl https://www.yahoo.com";
+let command = "xxxyyyzzz https://www.yahoo.com";
+
+
+getCGILauncher().exec(command, {maxBuffer: 1024*1024*1024})
 .then((stdout: Readable) => {
     stdout.pipe(process.stdout);
 }).catch((err: any) => {
