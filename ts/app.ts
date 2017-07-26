@@ -7,6 +7,7 @@ import {getAllExtensionModules} from "./extensions";
 import {ExtensionModuleExport, AppGlobal, getRequestData, ExtensionModule} from "crowdsourcing-api";
 import * as rcf from "rcf";
 import * as node$ from "rest-node";
+import * as oauth2 from "oauth2";
 import {get as getCGILauncher} from "./cgi-child-process";
 
 let NODE_PATH = process.env["NODE_PATH"];
@@ -41,12 +42,27 @@ app.options("/*", (req: express.Request, res: express.Response) => {
     res.send(200);
 });
 
-let selfApi = new rcf.AuthorizedRestApi(node$.get(), {instance_url: "http://127.0.0.1:" + Port.toString()});
-let selfApiRoute = selfApi.mount("/");
 let g: AppGlobal = {
-    selfApiRoute
-    ,cgiChildProcessLauncher: getCGILauncher()
+    cgiChildProcessLauncher: getCGILauncher()
 };
+
+let setSelfApiRouteMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    let rqd = getRequestData(req);
+    let access: rcf.OAuth2Access = {
+        instance_url: "http://127.0.0.1:" + Port.toString()   
+    };
+    let authHeader = <string>(req.headers["authorization"]);
+    let token = oauth2.Utils.getAccessTokenFromAuthorizationHeader(authHeader);
+    if (token) {
+        access.token_type = token.token_type;
+        access.access_token = token.access_token;
+    }
+    let selfApi = new rcf.AuthorizedRestApi(node$.get(), access);
+    rqd.set("__SelfApiRoute__", selfApi.mount("/"));
+    next();
+}
+
+app.use(setSelfApiRouteMiddleware);
 
 app.set("global", g);   // set the global object
 

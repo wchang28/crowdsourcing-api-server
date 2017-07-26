@@ -22,6 +22,7 @@
     "express-web-server": "https://github.com/wchang28/express-web-server.git",
     "lodash": "^4.17.4",
     "no-cache-express": "https://github.com/wchang28/no-cache-express.git",
+    "oauth2": "https://github.com/wchang28/oauth2.git",
     "rcf": "https://github.com/wchang28/rcf.git",
     "rest-node": "https://github.com/wchang28/rest-node.git"
   }
