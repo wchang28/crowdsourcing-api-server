@@ -6,3 +6,7 @@ logs
 npm-debug.log*
 
 js
+
+.tscache
+
+.baseDir.ts
