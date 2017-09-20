@@ -1,8 +1,11 @@
 {
   "name": "crowdsourcing-api-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Crowdsourcing API Server",
-  "scripts": {},
+  "scripts": {
+    "postinstall": "npm run build",
+    "build": "grunt"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/wchang28/croudsourcing-api-server.git"
@@ -24,6 +27,11 @@
     "no-cache-express": "https://github.com/wchang28/no-cache-express.git",
     "oauth2": "https://github.com/wchang28/oauth2.git",
     "rcf": "https://github.com/wchang28/rcf.git",
-    "rest-node": "https://github.com/wchang28/rest-node.git"
+    "rest-node": "https://github.com/wchang28/rest-node.git",
+    "typescript": "^2.5.2"
+  },
+  "devDependencies": {
+    "grunt-ts": "^6.0.0-beta.16",
+    "grunt": "^1.0.1"
   }
 }
