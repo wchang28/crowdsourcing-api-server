@@ -3,6 +3,7 @@
   "version": "1.0.1",
   "description": "Crowdsourcing API Server",
   "scripts": {
+    "start": "node ./js/app.js",
     "postinstall": "npm run build",
     "build": "grunt"
   },
